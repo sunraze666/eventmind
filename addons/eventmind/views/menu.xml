@@ -1,1 +1,11 @@
+<odoo>
+    <menuitem id="menu_eventmind_root" name="EventMind" sequence="10"/>
 
+    <menuitem
+        id="menu_eventmind_events"
+        name="События"
+        parent="menu_eventmind_root"
+        action="action_eventmind_event"
+        sequence="1"
+    />
+</odoo>

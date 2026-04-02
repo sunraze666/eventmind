@@ -1,1 +1,2 @@
-
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_eventmind_event_user,eventmind.event.user,model_eventmind_event,base.group_user,1,1,1,1
