@@ -1,5 +1,10 @@
 <odoo>
-    <menuitem id="menu_eventmind_root" name="EventMind" sequence="10"/>
+    <menuitem
+        id="menu_eventmind_root"
+        name="EventMind"
+        sequence="10"
+        action="action_eventmind_event"
+    />
 
     <menuitem
         id="menu_eventmind_events"

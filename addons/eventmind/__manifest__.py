@@ -5,9 +5,8 @@
     "category": "Productivity",
     "depends": ["base", "web"],
     "data": [
-        "security/ir.model.access.csv",
-        "views/menu.xml",
         "views/event_views.xml",
+        "views/menu.xml",
     ],
     "assets": {
         "web.assets_backend": [
