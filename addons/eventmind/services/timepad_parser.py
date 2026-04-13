@@ -2,12 +2,6 @@ import re
 import time
 from datetime import datetime
 
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.chrome.options import Options
-
 
 TIMEPAD_URL = "https://afisha.timepad.ru/ekaterinburg"
 SCROLL_PAUSE = 2
@@ -15,6 +9,9 @@ MAX_CLICKS = 50
 
 
 def setup_driver():
+    from selenium import webdriver
+    from selenium.webdriver.chrome.options import Options
+
     options = Options()
     options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
@@ -30,6 +27,8 @@ def setup_driver():
 
 
 def close_cookie_popup(driver):
+    from selenium.webdriver.common.by import By
+
     try:
         cookie_btn = driver.find_element(By.CSS_SELECTOR, ".ccookie-consent button, .cbtn--variant_primary")
         if cookie_btn and cookie_btn.is_displayed():
@@ -40,6 +39,8 @@ def close_cookie_popup(driver):
 
 
 def click_show_more_button(driver):
+    from selenium.webdriver.common.by import By
+
     try:
         buttons = driver.find_elements(
             By.XPATH,
@@ -57,6 +58,8 @@ def click_show_more_button(driver):
 
 
 def load_all_events(driver):
+    from selenium.webdriver.common.by import By
+
     previous_count = 0
     no_change_count = 0
     click_count = 0
@@ -87,6 +90,8 @@ def load_all_events(driver):
 
 
 def get_event_links_from_cards(cards):
+    from selenium.webdriver.common.by import By
+
     links = set()
     for card in cards:
         try:
@@ -138,6 +143,10 @@ def parse_date_range(date_text):
 
 
 def parse_event_details(driver, event_url):
+    from selenium.webdriver.common.by import By
+    from selenium.webdriver.support.ui import WebDriverWait
+    from selenium.webdriver.support import expected_conditions as EC
+
     driver.get(event_url)
     time.sleep(2)
     close_cookie_popup(driver)
@@ -181,17 +190,6 @@ def parse_event_details(driver, event_url):
                 break
         except Exception:
             continue
-
-    if not event["description"]:
-        try:
-            all_divs = driver.find_elements(By.TAG_NAME, "div")
-            for div in all_divs:
-                text = div.text.strip()
-                if len(text) > 200 and "cookie" not in text.lower() and "политик" not in text.lower():
-                    event["description"] = text
-                    break
-        except Exception:
-            pass
 
     date_selectors = [
         "[class*='EventInfo-module__date']",
@@ -263,6 +261,10 @@ def parse_event_details(driver, event_url):
 
 
 def fetch_timepad_events():
+    from selenium.webdriver.common.by import By
+    from selenium.webdriver.support.ui import WebDriverWait
+    from selenium.webdriver.support import expected_conditions as EC
+
     driver = setup_driver()
     try:
         driver.get(TIMEPAD_URL)
