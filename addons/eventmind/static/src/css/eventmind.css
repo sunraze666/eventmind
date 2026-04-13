@@ -20,8 +20,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 16px;
+    gap: 14px;
+    margin-bottom: 14px;
 }
 
 .em-calendar-title {
@@ -33,6 +33,34 @@
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
+}
+
+.em-calendar-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.em-view-switch {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.em-calendar-current {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #2f3650;
+    text-transform: capitalize;
+}
+
+.em-calendar-body {
+    border: 1px solid #edf0f6;
+    border-radius: 12px;
+    background: #fbfcff;
+    padding: 10px;
 }
 
 .em-year-grid {
@@ -72,18 +100,34 @@
 }
 
 .em-day-cell {
-    min-height: 28px;
+    min-height: 30px;
     border-radius: 6px;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
     position: relative;
-    font-size: 0.82rem;
+    font-size: 0.8rem;
     color: #2d3341;
+    padding: 4px;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.em-day-cell:hover {
+    border-color: #cfd7e6;
+    background: #f3f6fc;
 }
 
 .em-day-empty {
     background: transparent;
+    cursor: default;
+    border-color: transparent;
+}
+
+.em-day-empty:hover {
+    background: transparent;
+    border-color: transparent;
 }
 
 .em-day-with-events {
@@ -96,7 +140,7 @@
 }
 
 .em-day-number {
-    line-height: 1;
+    line-height: 1.1;
 }
 
 .em-day-badge {
@@ -112,6 +156,80 @@
     color: #fff;
     background: #d14a4a;
     padding: 0 3px;
+}
+
+.em-day-events {
+    width: 100%;
+    margin-top: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.em-day-more {
+    font-size: 0.7rem;
+    color: #5d6780;
+}
+
+.em-event-pill {
+    display: block;
+    width: 100%;
+    border-radius: 8px;
+    background: #e8eef9;
+    color: #2b3753;
+    padding: 3px 6px;
+    font-size: 0.72rem;
+    line-height: 1.2;
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+a.em-event-pill:hover {
+    background: #d9e4f7;
+}
+
+.em-week-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.em-week-day {
+    border: 1px solid #edf0f6;
+    border-radius: 10px;
+    background: #fff;
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+}
+
+.em-week-day-head {
+    padding: 8px;
+    border-bottom: 1px solid #edf0f6;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #303b57;
+}
+
+.em-week-day-body {
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.em-day-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 120px;
+}
+
+.em-empty-note {
+    color: #6a7288;
+    font-size: 0.85rem;
 }
 
 .em-calendar-note {
@@ -130,6 +248,10 @@
     .em-year-grid {
         grid-template-columns: repeat(2, minmax(220px, 1fr));
     }
+
+    .em-week-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
 
 @media (max-width: 575px) {
@@ -142,7 +264,16 @@
         align-items: flex-start;
     }
 
+    .em-calendar-toolbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
     .em-year-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .em-week-grid {
         grid-template-columns: 1fr;
     }
 }
