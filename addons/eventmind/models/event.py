@@ -1,5 +1,5 @@
 from odoo import models, fields, api
-from ..services.timepad_parser import fetch_timepad_events
+import json
 
 
 class EventMindEvent(models.Model):
@@ -57,8 +57,9 @@ class EventMindEvent(models.Model):
     ]
 
     @api.model
-    def import_timepad_events(self):
-        events = fetch_timepad_events()
+    def import_timepad_json(self, file_path="/mnt/extra-addons/eventmind/data/timepad_full_events.json"):
+        with open(file_path, "r", encoding="utf-8") as f:
+            events = json.load(f)
 
         for item in events:
             vals = {
@@ -71,7 +72,7 @@ class EventMindEvent(models.Model):
                 "status": "planned",
                 "source": "timepad",
                 "source_url": item.get("url") or "",
-                "external_id": item.get("external_id") or "",
+                "external_id": item.get("url") or item.get("external_id") or "",
                 "price": item.get("price") or "",
                 "age_limit": item.get("age_limit") or "",
             }
