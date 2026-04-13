@@ -1,2 +1,10 @@
-.o_action_manager {
+.o_kanban_record {
+    border-radius: 14px;
+    border: 1px solid #e5e5e5;
+    background: #ffffff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+}
+
+.o_kanban_record:hover {
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
 }

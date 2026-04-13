@@ -1,4 +1,5 @@
 <odoo>
+    <!-- LIST VIEW -->
     <record id="view_eventmind_event_list" model="ir.ui.view">
         <field name="name">eventmind.event.list</field>
         <field name="model">eventmind.event</field>
@@ -6,34 +7,54 @@
             <list string="События">
                 <field name="name"/>
                 <field name="date_start"/>
+                <field name="date_end"/>
                 <field name="location"/>
                 <field name="category"/>
+                <field name="status"/>
                 <field name="is_recommended"/>
             </list>
         </field>
     </record>
 
+    <!-- FORM VIEW -->
     <record id="view_eventmind_event_form" model="ir.ui.view">
         <field name="name">eventmind.event.form</field>
         <field name="model">eventmind.event</field>
         <field name="arch" type="xml">
             <form string="Событие">
                 <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" placeholder="Введите название события"/>
+                        </h1>
+                    </div>
+
                     <group>
-                        <field name="name"/>
-                        <field name="date_start"/>
-                        <field name="location"/>
-                        <field name="category"/>
-                        <field name="is_recommended"/>
+                        <group>
+                            <field name="date_start"/>
+                            <field name="date_end"/>
+                            <field name="location"/>
+                            <field name="category"/>
+                        </group>
+                        <group>
+                            <field name="status"/>
+                            <field name="is_recommended"/>
+                            <field name="seats"/>
+                        </group>
                     </group>
-                    <group>
-                        <field name="description"/>
-                    </group>
+
+                    <notebook>
+                        <page string="Описание">
+                            <field name="description" placeholder="Описание мероприятия..."/>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>
     </record>
 
+    <!-- SEARCH VIEW -->
     <record id="view_eventmind_event_search" model="ir.ui.view">
         <field name="name">eventmind.event.search</field>
         <field name="model">eventmind.event</field>
@@ -42,23 +63,118 @@
                 <field name="name"/>
                 <field name="location"/>
                 <field name="category"/>
-                <filter name="recommended" string="Рекомендованные" domain="[('is_recommended', '=', True)]"/>
+                <field name="status"/>
+
+                <filter name="recommended"
+                        string="Рекомендованные"
+                        domain="[('is_recommended', '=', True)]"/>
+
+                <filter name="draft"
+                        string="Черновики"
+                        domain="[('status', '=', 'draft')]"/>
+
+                <filter name="planned"
+                        string="Запланированные"
+                        domain="[('status', '=', 'planned')]"/>
+
+                <filter name="done"
+                        string="Завершенные"
+                        domain="[('status', '=', 'done')]"/>
+
                 <group expand="0" string="Группировка">
-                    <filter name="group_by_category" string="По категории" context="{'group_by': 'category'}"/>
-                    <filter name="group_by_location" string="По месту" context="{'group_by': 'location'}"/>
+                    <filter name="group_by_category"
+                            string="По категории"
+                            context="{'group_by': 'category'}"/>
+                    <filter name="group_by_location"
+                            string="По месту"
+                            context="{'group_by': 'location'}"/>
+                    <filter name="group_by_status"
+                            string="По статусу"
+                            context="{'group_by': 'status'}"/>
                 </group>
             </search>
         </field>
     </record>
 
+    <!-- KANBAN VIEW -->
+    <record id="view_eventmind_event_kanban" model="ir.ui.view">
+        <field name="name">eventmind.event.kanban</field>
+        <field name="model">eventmind.event</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <field name="name"/>
+                <field name="date_start"/>
+                <field name="location"/>
+                <field name="category"/>
+                <field name="status"/>
+                <field name="is_recommended"/>
+
+                <templates>
+                    <t t-name="card">
+                        <div class="o_kanban_record p-3">
+                            <div class="fw-bold fs-5 mb-2">
+                                <field name="name"/>
+                            </div>
+
+                            <div class="mb-1">
+                                <strong>Дата:</strong>
+                                <field name="date_start"/>
+                            </div>
+
+                            <div class="mb-1">
+                                <strong>Место:</strong>
+                                <field name="location"/>
+                            </div>
+
+                            <div class="mb-1">
+                                <strong>Категория:</strong>
+                                <field name="category"/>
+                            </div>
+
+                            <div class="mb-1">
+                                <strong>Статус:</strong>
+                                <field name="status"/>
+                            </div>
+
+                            <div t-if="record.is_recommended.raw_value" class="mt-2 text-success fw-bold">
+                                ★ Рекомендовано
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- CALENDAR VIEW -->
+    <record id="view_eventmind_event_calendar" model="ir.ui.view">
+        <field name="name">eventmind.event.calendar</field>
+        <field name="model">eventmind.event</field>
+        <field name="arch" type="xml">
+            <calendar string="Календарь событий"
+                      date_start="date_start"
+                      date_stop="date_end"
+                      color="category"
+                      mode="month">
+                <field name="name"/>
+                <field name="location"/>
+                <field name="status"/>
+            </calendar>
+        </field>
+    </record>
+
+    <!-- ACTION -->
     <record id="action_eventmind_event" model="ir.actions.act_window">
         <field name="name">События</field>
         <field name="res_model">eventmind.event</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">list,kanban,calendar,form</field>
         <field name="search_view_id" ref="view_eventmind_event_search"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Создай первое событие для EventMind
+            </p>
+            <p>
+                Здесь будут храниться мероприятия, рекомендации и расписание.
             </p>
         </field>
     </record>
