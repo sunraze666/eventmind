@@ -1,5 +1,4 @@
 <odoo>
-    <!-- LIST VIEW -->
     <record id="view_eventmind_event_list" model="ir.ui.view">
         <field name="name">eventmind.event.list</field>
         <field name="model">eventmind.event</field>
@@ -11,12 +10,14 @@
                 <field name="location"/>
                 <field name="category"/>
                 <field name="status"/>
+                <field name="source"/>
+                <field name="price"/>
+                <field name="age_limit"/>
                 <field name="is_recommended"/>
             </list>
         </field>
     </record>
 
-    <!-- FORM VIEW -->
     <record id="view_eventmind_event_form" model="ir.ui.view">
         <field name="name">eventmind.event.form</field>
         <field name="model">eventmind.event</field>
@@ -36,11 +37,16 @@
                             <field name="date_end"/>
                             <field name="location"/>
                             <field name="category"/>
+                            <field name="source"/>
+                            <field name="source_url"/>
                         </group>
                         <group>
                             <field name="status"/>
                             <field name="is_recommended"/>
                             <field name="seats"/>
+                            <field name="price"/>
+                            <field name="age_limit"/>
+                            <field name="external_id" readonly="1"/>
                         </group>
                     </group>
 
@@ -54,7 +60,6 @@
         </field>
     </record>
 
-    <!-- SEARCH VIEW -->
     <record id="view_eventmind_event_search" model="ir.ui.view">
         <field name="name">eventmind.event.search</field>
         <field name="model">eventmind.event</field>
@@ -64,22 +69,19 @@
                 <field name="location"/>
                 <field name="category"/>
                 <field name="status"/>
+                <field name="source"/>
 
                 <filter name="recommended"
                         string="Рекомендованные"
                         domain="[('is_recommended', '=', True)]"/>
 
-                <filter name="draft"
-                        string="Черновики"
-                        domain="[('status', '=', 'draft')]"/>
+                <filter name="timepad"
+                        string="Timepad"
+                        domain="[('source', '=', 'timepad')]"/>
 
                 <filter name="planned"
                         string="Запланированные"
                         domain="[('status', '=', 'planned')]"/>
-
-                <filter name="done"
-                        string="Завершенные"
-                        domain="[('status', '=', 'done')]"/>
 
                 <group expand="0" string="Группировка">
                     <filter name="group_by_category"
@@ -91,12 +93,14 @@
                     <filter name="group_by_status"
                             string="По статусу"
                             context="{'group_by': 'status'}"/>
+                    <filter name="group_by_source"
+                            string="По источнику"
+                            context="{'group_by': 'source'}"/>
                 </group>
             </search>
         </field>
     </record>
 
-    <!-- KANBAN VIEW -->
     <record id="view_eventmind_event_kanban" model="ir.ui.view">
         <field name="name">eventmind.event.kanban</field>
         <field name="model">eventmind.event</field>
@@ -108,6 +112,8 @@
                 <field name="category"/>
                 <field name="status"/>
                 <field name="is_recommended"/>
+                <field name="source"/>
+                <field name="price"/>
 
                 <templates>
                     <t t-name="card">
@@ -132,8 +138,13 @@
                             </div>
 
                             <div class="mb-1">
-                                <strong>Статус:</strong>
-                                <field name="status"/>
+                                <strong>Источник:</strong>
+                                <field name="source"/>
+                            </div>
+
+                            <div class="mb-1">
+                                <strong>Цена:</strong>
+                                <field name="price"/>
                             </div>
 
                             <div t-if="record.is_recommended.raw_value" class="mt-2 text-success fw-bold">
@@ -146,7 +157,6 @@
         </field>
     </record>
 
-    <!-- CALENDAR VIEW -->
     <record id="view_eventmind_event_calendar" model="ir.ui.view">
         <field name="name">eventmind.event.calendar</field>
         <field name="model">eventmind.event</field>
@@ -163,7 +173,6 @@
         </field>
     </record>
 
-    <!-- ACTION -->
     <record id="action_eventmind_event" model="ir.actions.act_window">
         <field name="name">События</field>
         <field name="res_model">eventmind.event</field>
@@ -174,7 +183,7 @@
                 Создай первое событие для EventMind
             </p>
             <p>
-                Здесь будут храниться мероприятия, рекомендации и расписание.
+                Здесь будут храниться мероприятия, импортированные в том числе с Timepad.
             </p>
         </field>
     </record>

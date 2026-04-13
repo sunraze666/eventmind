@@ -1,0 +1,51 @@
+<odoo>
+    <template id="eventmind_events_page" name="EventMind Events Page">
+        <t t-call="website.layout">
+            <div class="container my-5">
+                <h1 class="mb-4">События EventMind</h1>
+
+                <div class="row">
+                    <t t-foreach="events" t-as="event">
+                        <div class="col-md-4 mb-4">
+                            <div class="card h-100 shadow-sm p-3">
+                                <h4><t t-esc="event.name"/></h4>
+
+                                <p>
+                                    <strong>Дата:</strong>
+                                    <t t-esc="event.date_start"/>
+                                </p>
+
+                                <p>
+                                    <strong>Место:</strong>
+                                    <t t-esc="event.location"/>
+                                </p>
+
+                                <p t-if="event.price">
+                                    <strong>Цена:</strong>
+                                    <t t-esc="event.price"/>
+                                </p>
+
+                                <p t-if="event.age_limit">
+                                    <strong>Возраст:</strong>
+                                    <t t-esc="event.age_limit"/>
+                                </p>
+
+                                <p t-if="event.description">
+                                    <t t-esc="event.description[:180]"/>
+                                    <t t-if="len(event.description) > 180">...</t>
+                                </p>
+
+                                <a t-if="event.source_url"
+                                   t-att-href="event.source_url"
+                                   target="_blank"
+                                   class="btn btn-primary">
+                                    Открыть источник
+                                </a>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>
