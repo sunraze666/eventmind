@@ -49,6 +49,12 @@
     flex-wrap: wrap;
 }
 
+.em-density-switch {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
 .em-calendar-current {
     font-size: 1rem;
     font-weight: 600;
@@ -130,8 +136,24 @@
     border-color: transparent;
 }
 
-.em-day-with-events {
-    background: #f3e5e4;
+.em-density-level-1 {
+    background: #f8efed;
+}
+
+.em-density-level-2 {
+    background: #f6e3df;
+}
+
+.em-density-level-3 {
+    background: #f2d3cb;
+}
+
+.em-density-level-4 {
+    background: #ebc0b3;
+}
+
+.em-density-level-5 {
+    background: #e4a995;
 }
 
 .em-day-today {
@@ -171,23 +193,95 @@
     color: #5d6780;
 }
 
-.em-event-pill {
+.em-day-count-inline {
+    margin-top: 4px;
+    font-size: 0.68rem;
+    color: #45506b;
+    font-weight: 600;
+}
+
+.em-event-chip {
     display: block;
     width: 100%;
     border-radius: 8px;
-    background: #e8eef9;
+    background: #edf2fb;
     color: #2b3753;
-    padding: 3px 6px;
-    font-size: 0.72rem;
+    padding: 4px 6px;
+    font-size: 0.7rem;
     line-height: 1.2;
     text-decoration: none;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    border: 1px solid #dbe4f5;
 }
 
-a.em-event-pill:hover {
-    background: #d9e4f7;
+.em-event-chip-time {
+    color: #66718c;
+    margin-right: 4px;
+    font-variant-numeric: tabular-nums;
+}
+
+.em-event-chip-title {
+    color: #293655;
+}
+
+.em-event-chip-muted {
+    background: #f1f4f9;
+    border-color: #e4e9f2;
+}
+
+a.em-event-chip:hover {
+    background: #dde7f8;
+    border-color: #c9d6f0;
+}
+
+.em-event-card {
+    border: 1px solid #e8edf8;
+    border-radius: 10px;
+    padding: 8px;
+    background: #f8fafe;
+}
+
+.em-event-card-head {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+}
+
+.em-event-time {
+    font-size: 0.72rem;
+    font-variant-numeric: tabular-nums;
+    color: #5b6682;
+    white-space: nowrap;
+}
+
+.em-event-title {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #26304a;
+}
+
+.em-event-meta {
+    margin-top: 4px;
+    font-size: 0.72rem;
+    color: #626d89;
+}
+
+.em-event-link {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: #3f5e9f;
+    color: #fff;
+    font-size: 0.68rem;
+    text-decoration: none;
+}
+
+.em-event-link:hover {
+    background: #36538f;
+    color: #fff;
 }
 
 .em-week-grid {

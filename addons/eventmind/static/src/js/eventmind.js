@@ -4,7 +4,10 @@ const VIEW_YEAR = "year";
 const VIEW_MONTH = "month";
 const VIEW_WEEK = "week";
 const VIEW_DAY = "day";
+const DENSITY_TONE = "tone";
+const DENSITY_COUNT = "count";
 const VIEWS = [VIEW_YEAR, VIEW_MONTH, VIEW_WEEK, VIEW_DAY];
+const DENSITIES = [DENSITY_TONE, DENSITY_COUNT];
 const WEEKDAYS_RU = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
 const MONTHS_RU = [
     "Январь",
@@ -39,6 +42,14 @@ function sanitizeUrl(value) {
         return trimmed;
     }
     return "";
+}
+
+function truncateText(value, maxLength) {
+    const text = String(value || "");
+    if (text.length <= maxLength) {
+        return text;
+    }
+    return `${text.slice(0, maxLength - 1)}...`;
 }
 
 function parseDate(value) {
@@ -78,6 +89,10 @@ function dateKey(date) {
 
 function formatShortDate(date) {
     return `${String(date.getDate()).padStart(2, "0")}.${String(date.getMonth() + 1).padStart(2, "0")}.${date.getFullYear()}`;
+}
+
+function formatTime(date) {
+    return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
 }
 
 function getSpanDays(event) {
@@ -127,17 +142,63 @@ function createEventsMap(events) {
     return map;
 }
 
-function createEventMarkup(event) {
-    const labelParts = [event.title];
-    if (event.location) {
-        labelParts.push(event.location);
+function getMaxEventsPerDay(eventsMap) {
+    let max = 0;
+    for (const events of eventsMap.values()) {
+        if (events.length > max) {
+            max = events.length;
+        }
     }
-    const label = escapeHtml(labelParts.join(" - "));
+    return max;
+}
+
+function getIntensityLevel(count, maxCount) {
+    if (!count || !maxCount) {
+        return 0;
+    }
+    if (maxCount <= 1) {
+        return 5;
+    }
+    const ratio = count / maxCount;
+    if (ratio <= 0.2) {
+        return 1;
+    }
+    if (ratio <= 0.4) {
+        return 2;
+    }
+    if (ratio <= 0.6) {
+        return 3;
+    }
+    if (ratio <= 0.8) {
+        return 4;
+    }
+    return 5;
+}
+
+function createEventChip(event) {
+    const title = escapeHtml(truncateText(event.title, 22));
+    const time = escapeHtml(formatTime(event.start));
+    const content = `<span class="em-event-chip-time">${time}</span><span class="em-event-chip-title">${title}</span>`;
     const safeUrl = sanitizeUrl(event.url);
     if (safeUrl) {
-        return `<a class="em-event-pill" href="${safeUrl}" target="_blank" rel="noopener noreferrer">${label}</a>`;
+        return `<a class="em-event-chip" href="${safeUrl}" target="_blank" rel="noopener noreferrer">${content}</a>`;
     }
-    return `<span class="em-event-pill">${label}</span>`;
+    return `<span class="em-event-chip em-event-chip-muted">${content}</span>`;
+}
+
+function createEventCard(event) {
+    const title = escapeHtml(truncateText(event.title, 72));
+    const location = event.location ? escapeHtml(truncateText(event.location, 44)) : "";
+    const time = escapeHtml(formatTime(event.start));
+    const safeUrl = sanitizeUrl(event.url);
+    return `<article class="em-event-card">
+        <div class="em-event-card-head">
+            <span class="em-event-time">${time}</span>
+            <span class="em-event-title">${title}</span>
+        </div>
+        ${location ? `<div class="em-event-meta">${location}</div>` : ""}
+        ${safeUrl ? `<a class="em-event-link" href="${safeUrl}" target="_blank" rel="noopener noreferrer">Подробнее</a>` : ""}
+    </article>`;
 }
 
 function renderWeekHeader() {
@@ -149,6 +210,8 @@ function renderMonthGrid(year, monthIndex, eventsMap, options = {}) {
     const firstDay = new Date(year, monthIndex, 1);
     const offset = (firstDay.getDay() + 6) % 7;
     const totalDays = daysInMonth(year, monthIndex);
+    const showTone = options.densityMode === DENSITY_TONE;
+    const showCount = options.densityMode === DENSITY_COUNT;
     const cells = [];
 
     for (let i = 0; i < offset; i++) {
@@ -163,15 +226,21 @@ function renderMonthGrid(year, monthIndex, eventsMap, options = {}) {
         if (key === today) {
             classes.push("em-day-today");
         }
-        if (events.length) {
-            classes.push("em-day-with-events");
+        if (events.length && showTone) {
+            const intensity = getIntensityLevel(events.length, options.maxDailyCount || 1);
+            if (intensity) {
+                classes.push(`em-density-level-${intensity}`);
+            }
         }
 
         let eventsHtml = "";
         if (options.compact) {
-            eventsHtml = events.length ? `<span class="em-day-badge">${events.length}</span>` : "";
+            eventsHtml = showCount && events.length ? `<span class="em-day-badge">${events.length}</span>` : "";
         } else if (events.length) {
-            eventsHtml = `<div class="em-day-events">${events.slice(0, 2).map(createEventMarkup).join("")}${events.length > 2 ? `<span class="em-day-more">+${events.length - 2}</span>` : ""}</div>`;
+            const chips = events.slice(0, 2).map(createEventChip).join("");
+            const more = events.length > 2 ? `<span class="em-day-more">+${events.length - 2}</span>` : "";
+            const badge = showCount ? `<span class="em-day-count-inline">${events.length}</span>` : "";
+            eventsHtml = `<div class="em-day-events">${chips}${more}${badge}</div>`;
         }
 
         cells.push(
@@ -185,22 +254,30 @@ function renderMonthGrid(year, monthIndex, eventsMap, options = {}) {
     return `<div class="em-month-grid">${cells.join("")}</div>`;
 }
 
-function renderYearView(cursor, eventsMap) {
+function renderYearView(cursor, eventsMap, options) {
     const year = cursor.getFullYear();
     const months = MONTHS_RU.map((monthName, monthIndex) => {
         return `<article class="em-month-card">
             <h3 class="em-month-title">${monthName} ${year}</h3>
             ${renderWeekHeader()}
-            ${renderMonthGrid(year, monthIndex, eventsMap, { compact: true })}
+            ${renderMonthGrid(year, monthIndex, eventsMap, {
+                compact: true,
+                densityMode: options.densityMode,
+                maxDailyCount: options.maxDailyCount,
+            })}
         </article>`;
     }).join("");
     return `<div class="em-year-grid">${months}</div>`;
 }
 
-function renderMonthView(cursor, eventsMap) {
+function renderMonthView(cursor, eventsMap, options) {
     const year = cursor.getFullYear();
     const monthIndex = cursor.getMonth();
-    return `${renderWeekHeader()}${renderMonthGrid(year, monthIndex, eventsMap, { compact: false })}`;
+    return `${renderWeekHeader()}${renderMonthGrid(year, monthIndex, eventsMap, {
+        compact: false,
+        densityMode: options.densityMode,
+        maxDailyCount: options.maxDailyCount,
+    })}`;
 }
 
 function renderWeekView(cursor, eventsMap) {
@@ -212,7 +289,7 @@ function renderWeekView(cursor, eventsMap) {
         const events = eventsMap.get(key) || [];
         columns.push(`<div class="em-week-day">
             <div class="em-week-day-head">${WEEKDAYS_RU[i]}, ${formatShortDate(current)}</div>
-            <div class="em-week-day-body">${events.length ? events.map(createEventMarkup).join("") : '<span class="em-empty-note">Нет событий</span>'}</div>
+            <div class="em-week-day-body">${events.length ? events.map(createEventCard).join("") : '<span class="em-empty-note">Нет событий</span>'}</div>
         </div>`);
     }
     return `<div class="em-week-grid">${columns.join("")}</div>`;
@@ -224,7 +301,7 @@ function renderDayView(cursor, eventsMap) {
     if (!events.length) {
         return `<div class="em-day-list"><span class="em-empty-note">На ${formatShortDate(cursor)} событий нет.</span></div>`;
     }
-    return `<div class="em-day-list">${events.map(createEventMarkup).join("")}</div>`;
+    return `<div class="em-day-list">${events.map(createEventCard).join("")}</div>`;
 }
 
 function getTitle(view, cursor) {
@@ -254,7 +331,7 @@ function moveCursor(cursor, view, direction) {
     return next;
 }
 
-function renderCalendar(root, state, eventsMap) {
+function renderCalendar(root, state, eventsMap, stats) {
     const body = root.querySelector("[data-em-calendar-body]");
     const label = root.querySelector("[data-em-current-label]");
     if (!body || !label) {
@@ -263,9 +340,15 @@ function renderCalendar(root, state, eventsMap) {
 
     let markup = "";
     if (state.view === VIEW_YEAR) {
-        markup = renderYearView(state.cursor, eventsMap);
+        markup = renderYearView(state.cursor, eventsMap, {
+            densityMode: state.densityMode,
+            maxDailyCount: stats.maxDailyCount,
+        });
     } else if (state.view === VIEW_MONTH) {
-        markup = renderMonthView(state.cursor, eventsMap);
+        markup = renderMonthView(state.cursor, eventsMap, {
+            densityMode: state.densityMode,
+            maxDailyCount: stats.maxDailyCount,
+        });
     } else if (state.view === VIEW_WEEK) {
         markup = renderWeekView(state.cursor, eventsMap);
     } else {
@@ -277,6 +360,11 @@ function renderCalendar(root, state, eventsMap) {
 
     root.querySelectorAll("[data-em-view]").forEach((button) => {
         const isActive = button.dataset.emView === state.view;
+        button.classList.toggle("btn-primary", isActive);
+        button.classList.toggle("btn-outline-secondary", !isActive);
+    });
+    root.querySelectorAll("[data-em-density]").forEach((button) => {
+        const isActive = button.dataset.emDensity === state.densityMode;
         button.classList.toggle("btn-primary", isActive);
         button.classList.toggle("btn-outline-secondary", !isActive);
     });
@@ -293,7 +381,7 @@ function renderCalendar(root, state, eventsMap) {
             }
             state.cursor = target;
             state.view = VIEW_DAY;
-            renderCalendar(root, state, eventsMap);
+            renderCalendar(root, state, eventsMap, stats);
         });
     });
 }
@@ -316,8 +404,12 @@ function bootEventMindCalendar() {
 
     const events = prepareEvents(rawEvents);
     const eventsMap = createEventsMap(events);
+    const stats = {
+        maxDailyCount: getMaxEventsPerDay(eventsMap),
+    };
     const state = {
         view: VIEW_MONTH,
+        densityMode: DENSITY_TONE,
         cursor: startOfDay(new Date()),
     };
 
@@ -328,7 +420,17 @@ function bootEventMindCalendar() {
                 return;
             }
             state.view = requestedView;
-            renderCalendar(root, state, eventsMap);
+            renderCalendar(root, state, eventsMap, stats);
+        });
+    });
+    root.querySelectorAll("[data-em-density]").forEach((button) => {
+        button.addEventListener("click", () => {
+            const requestedDensity = button.dataset.emDensity;
+            if (!DENSITIES.includes(requestedDensity)) {
+                return;
+            }
+            state.densityMode = requestedDensity;
+            renderCalendar(root, state, eventsMap, stats);
         });
     });
 
@@ -342,11 +444,11 @@ function bootEventMindCalendar() {
             } else if (action === "next") {
                 state.cursor = moveCursor(state.cursor, state.view, 1);
             }
-            renderCalendar(root, state, eventsMap);
+            renderCalendar(root, state, eventsMap, stats);
         });
     });
 
-    renderCalendar(root, state, eventsMap);
+    renderCalendar(root, state, eventsMap, stats);
 }
 
 if (document.readyState === "loading") {

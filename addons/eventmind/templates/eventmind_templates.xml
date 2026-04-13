@@ -21,13 +21,17 @@
                             <button type="button" class="btn btn-sm btn-outline-secondary" data-em-view="week">Неделя</button>
                             <button type="button" class="btn btn-sm btn-outline-secondary" data-em-view="day">День</button>
                         </div>
+                        <div class="em-density-switch" role="tablist" aria-label="Плотность событий">
+                            <button type="button" class="btn btn-sm btn-primary" data-em-density="tone">Оттенки</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-em-density="count">Цифры</button>
+                        </div>
                         <div class="em-calendar-current" data-em-current-label=""></div>
                     </div>
 
                     <div class="em-calendar-body" data-em-calendar-body=""></div>
 
                     <script id="em-calendar-events" type="application/json"><t t-raw="calendar_events_json"/></script>
-                    <p class="em-calendar-note mb-0">Можно переключаться по видам и быстро смотреть события по дням.</p>
+                    <p class="em-calendar-note mb-0">Режим "Оттенки" показывает нагрузку по дням цветом, "Цифры" - точным количеством.</p>
                 </section>
 
                 <div class="row">
