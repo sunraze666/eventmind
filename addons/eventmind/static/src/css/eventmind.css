@@ -8,3 +8,142 @@
 .o_kanban_record:hover {
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
 }
+
+.em-calendar-section {
+    border: 1px solid #e3e5eb;
+    border-radius: 14px;
+    background: #fff;
+    padding: 18px;
+}
+
+.em-calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.em-calendar-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.em-calendar-nav {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.em-year-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(220px, 1fr));
+    gap: 14px;
+}
+
+.em-month-card {
+    border: 1px solid #eceef3;
+    border-radius: 12px;
+    padding: 10px;
+    background: #fbfcff;
+}
+
+.em-month-title {
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.em-week-header,
+.em-month-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 4px;
+}
+
+.em-week-header {
+    font-size: 0.75rem;
+    color: #6c7485;
+    margin-bottom: 4px;
+}
+
+.em-week-header span {
+    text-align: center;
+}
+
+.em-day-cell {
+    min-height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    font-size: 0.82rem;
+    color: #2d3341;
+}
+
+.em-day-empty {
+    background: transparent;
+}
+
+.em-day-with-events {
+    background: #f3e5e4;
+}
+
+.em-day-today {
+    border: 1px solid #6d5cae;
+    font-weight: 600;
+}
+
+.em-day-number {
+    line-height: 1;
+}
+
+.em-day-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    min-width: 14px;
+    height: 14px;
+    border-radius: 999px;
+    font-size: 0.62rem;
+    line-height: 14px;
+    text-align: center;
+    color: #fff;
+    background: #d14a4a;
+    padding: 0 3px;
+}
+
+.em-calendar-note {
+    margin-top: 14px;
+    font-size: 0.85rem;
+    color: #637083;
+}
+
+@media (max-width: 1199px) {
+    .em-year-grid {
+        grid-template-columns: repeat(3, minmax(220px, 1fr));
+    }
+}
+
+@media (max-width: 991px) {
+    .em-year-grid {
+        grid-template-columns: repeat(2, minmax(220px, 1fr));
+    }
+}
+
+@media (max-width: 575px) {
+    .em-calendar-section {
+        padding: 14px;
+    }
+
+    .em-calendar-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .em-year-grid {
+        grid-template-columns: 1fr;
+    }
+}
+

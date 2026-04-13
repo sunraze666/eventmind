@@ -2,31 +2,74 @@
     <template id="eventmind_events_page" name="EventMind Events Page">
         <t t-call="website.layout">
             <div class="container my-5">
-                <h1 class="mb-4">События EventMind</h1>
+                <h1 class="mb-4">??????? EventMind</h1>
+
+                <section class="em-calendar-section mb-5">
+                    <div class="em-calendar-header">
+                        <h2 class="em-calendar-title mb-0">????????? ??????? <t t-esc="calendar_data['year']"/></h2>
+                        <div class="em-calendar-nav">
+                            <a class="btn btn-outline-secondary btn-sm" t-att-href="'/eventmind/events?year=%s' % prev_year">? <t t-esc="prev_year"/></a>
+                            <a class="btn btn-outline-secondary btn-sm" t-att-href="'/eventmind/events?year=%s' % current_year">???????</a>
+                            <a class="btn btn-outline-secondary btn-sm" t-att-href="'/eventmind/events?year=%s' % next_year"><t t-esc="next_year"/> ?</a>
+                        </div>
+                    </div>
+
+                    <div class="em-year-grid">
+                        <t t-foreach="calendar_data['months']" t-as="month" t-key="month['name']">
+                            <article class="em-month-card">
+                                <h3 class="em-month-title"><t t-esc="month['name']"/> <t t-esc="month['year']"/> ?.</h3>
+
+                                <div class="em-week-header">
+                                    <t t-foreach="calendar_data['weekday_names']" t-as="weekday" t-key="weekday">
+                                        <span><t t-esc="weekday"/></span>
+                                    </t>
+                                </div>
+
+                                <div class="em-month-grid">
+                                    <t t-foreach="month['weeks']" t-as="week" t-key="week">
+                                        <t t-foreach="week" t-as="cell" t-key="cell and cell['day'] or 0">
+                                            <t t-if="cell">
+                                                <div t-attf-class="em-day-cell #{'em-day-with-events' if cell['event_count'] else ''} #{'em-day-today' if cell['is_today'] else ''}">
+                                                    <span class="em-day-number"><t t-esc="cell['day']"/></span>
+                                                    <span t-if="cell['event_count']" class="em-day-badge"><t t-esc="cell['event_count']"/></span>
+                                                </div>
+                                            </t>
+                                            <t t-else="">
+                                                <div class="em-day-cell em-day-empty"></div>
+                                            </t>
+                                        </t>
+                                    </t>
+                                </div>
+                            </article>
+                        </t>
+                    </div>
+
+                    <p class="em-calendar-note mb-0">????? ? ?????? ??????????, ??????? ??????? ???????? ? ???? ????.</p>
+                </section>
 
                 <div class="row">
-                    <t t-foreach="events" t-as="event">
+                    <t t-foreach="events" t-as="event" t-key="event.id">
                         <div class="col-md-4 mb-4">
                             <div class="card h-100 shadow-sm p-3">
                                 <h4><t t-esc="event.name"/></h4>
 
                                 <p>
-                                    <strong>Дата:</strong>
+                                    <strong>????:</strong>
                                     <t t-esc="event.date_start"/>
                                 </p>
 
                                 <p>
-                                    <strong>Место:</strong>
+                                    <strong>?????:</strong>
                                     <t t-esc="event.location"/>
                                 </p>
 
                                 <p t-if="event.price">
-                                    <strong>Цена:</strong>
+                                    <strong>????:</strong>
                                     <t t-esc="event.price"/>
                                 </p>
 
                                 <p t-if="event.age_limit">
-                                    <strong>Возраст:</strong>
+                                    <strong>???????:</strong>
                                     <t t-esc="event.age_limit"/>
                                 </p>
 
@@ -39,7 +82,7 @@
                                    t-att-href="event.source_url"
                                    target="_blank"
                                    class="btn btn-primary">
-                                    Открыть источник
+                                    ??????? ????????
                                 </a>
                             </div>
                         </div>

@@ -15,6 +15,9 @@
             "eventmind/static/src/css/eventmind.css",
             "eventmind/static/src/js/eventmind.js",
         ],
+        "web.assets_frontend": [
+            "eventmind/static/src/css/eventmind.css",
+        ],
     },
     "installable": True,
     "application": True,
