@@ -57,16 +57,27 @@ class EventMindEvent(models.Model):
     ]
 
     @api.model
+    def _normalize_datetime_value(self, value):
+        if not value:
+            return False
+        if isinstance(value, str):
+            return value.replace("T", " ")
+        return value
+
+    @api.model
     def import_timepad_json(self, file_path="/mnt/extra-addons/eventmind/data/timepad_full_events.json"):
         with open(file_path, "r", encoding="utf-8") as f:
             events = json.load(f)
 
         for item in events:
+            date_start = self._normalize_datetime_value(item.get("date_start"))
+            date_end = self._normalize_datetime_value(item.get("date_end")) or date_start
+
             vals = {
                 "name": item.get("name") or "Без названия",
                 "description": item.get("description") or "",
-                "date_start": item.get("date_start") or fields.Datetime.now(),
-                "date_end": item.get("date_end") or item.get("date_start") or fields.Datetime.now(),
+                "date_start": date_start or fields.Datetime.now(),
+                "date_end": date_end or fields.Datetime.now(),
                 "location": item.get("location") or "",
                 "category": "other",
                 "status": "planned",
