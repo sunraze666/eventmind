@@ -1,10 +1,12 @@
 <odoo>
     <template id="eventmind_site_header" name="EventMind Site Header">
         <div class="em-site-header mb-4">
-            <a href="/eventmind/events" class="btn btn-outline-primary">Главная</a>
-            <a href="/eventmind/signup" class="btn btn-outline-secondary">Регистрация</a>
-            <a href="/eventmind/login" class="btn btn-primary">Вход</a>
-            <a href="/eventmind/cabinet" class="btn btn-outline-primary">Мой кабинет</a>
+            <a href="/eventmind/events" class="em-home-btn">Главная</a>
+            <div class="em-site-header-actions">
+                <a href="/eventmind/signup" class="btn btn-outline-secondary">Регистрация</a>
+                <a href="/eventmind/login" class="btn btn-primary">Вход</a>
+                <a href="/eventmind/cabinet" class="btn btn-outline-primary">Мой кабинет</a>
+            </div>
         </div>
     </template>
 

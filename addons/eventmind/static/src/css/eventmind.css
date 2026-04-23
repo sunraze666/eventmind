@@ -336,7 +336,37 @@ a.em-event-chip:hover {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    border: 1px solid #e3e5eb;
+    border-radius: 14px;
+    background: linear-gradient(180deg, #ffffff 0%, #fbfcff 100%);
+}
+
+.em-home-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 1px solid #6d5cae;
+    background: #6d5cae;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.em-home-btn:hover {
+    background: #5c4e92;
+    border-color: #5c4e92;
+    color: #fff;
+}
+
+.em-site-header-actions {
+    display: flex;
+    flex-wrap: wrap;
     justify-content: flex-end;
+    gap: 8px;
 }
 
 .em-interest-tags {
@@ -394,7 +424,20 @@ a.em-event-chip:hover {
 
 @media (max-width: 575px) {
     .em-site-header {
-        justify-content: flex-start;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .em-home-btn {
+        justify-content: center;
+    }
+
+    .em-site-header-actions {
+        justify-content: stretch;
+    }
+
+    .em-site-header-actions .btn {
+        width: 100%;
     }
 
     .em-calendar-section {
