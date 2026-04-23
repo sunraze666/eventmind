@@ -54,6 +54,16 @@ class EventMindController(http.Controller):
                 {"login": login, "password": password, "type": "password"},
             )
 
+    def _extract_interest_values(self):
+        selected = request.httprequest.form.getlist("interests")
+        selected = [item.strip() for item in selected if item and item.strip()]
+        return [item for item in selected if item in self.INTEREST_TAGS]
+
+    @staticmethod
+    def _extract_partner_interest_values(partner):
+        raw = partner.em_interests or ""
+        return [item.strip() for item in raw.split(",") if item.strip()]
+
     @http.route("/eventmind/events", type="http", auth="public", website=True)
     def eventmind_events(self, **kwargs):
         events = request.env["eventmind.event"].sudo().search(
@@ -116,9 +126,7 @@ class EventMindController(http.Controller):
         password_confirm = post.get("password_confirm") or ""
         age_raw = (post.get("age") or "").strip()
         gender = (post.get("gender") or "").strip()
-        selected_interests = request.httprequest.form.getlist("interests")
-        selected_interests = [item.strip() for item in selected_interests if item and item.strip()]
-        selected_interests = [item for item in selected_interests if item in self.INTEREST_TAGS]
+        selected_interests = self._extract_interest_values()
         interests = ", ".join(selected_interests)
 
         values = {
@@ -181,10 +189,97 @@ class EventMindController(http.Controller):
         self._authenticate(login, password)
         return request.redirect("/eventmind/cabinet")
 
-    @http.route("/eventmind/cabinet", type="http", auth="user", website=True)
-    def eventmind_cabinet(self, **kwargs):
-        user = request.env.user
-        events = user.sudo().personal_event_ids.sorted(key=lambda e: e.date_start or fields.Datetime.now())
+    @http.route("/eventmind/cabinet", type="http", auth="user", website=True, methods=["GET", "POST"])
+    def eventmind_cabinet(self, **post):
+        user = request.env.user.sudo()
+        profile = user.partner_id.sudo()
+        error = ""
+        success = ""
+
+        if request.httprequest.method == "POST":
+            action = post.get("action")
+            if action == "update_profile":
+                full_name = (post.get("full_name") or "").strip()
+                email = (post.get("email") or "").strip().lower()
+                age_raw = (post.get("age") or "").strip()
+                gender = (post.get("gender") or "").strip()
+                selected_interests = self._extract_interest_values()
+                interests = ", ".join(selected_interests)
+
+                age_value = 0
+                if not full_name or not email:
+                    error = "ФИО и email обязательны."
+                else:
+                    if age_raw:
+                        try:
+                            age_value = int(age_raw)
+                        except ValueError:
+                            error = "Возраст должен быть числом."
+                        if age_value < 0 or age_value > 120:
+                            error = "Возраст должен быть от 0 до 120."
+
+                valid_genders = {"male", "female", "other", ""}
+                if not error and gender not in valid_genders:
+                    error = "Выбрано некорректное значение пола."
+
+                if not error:
+                    duplicate = (
+                        request.env["res.users"]
+                        .sudo()
+                        .search_count([("login", "=", email), ("id", "!=", user.id)])
+                    )
+                    if duplicate:
+                        error = "Пользователь с таким email уже существует."
+
+                if not error:
+                    user.write(
+                        {
+                            "name": full_name,
+                            "login": email,
+                            "email": email,
+                        }
+                    )
+                    profile.write(
+                        {
+                            "name": full_name,
+                            "em_age": age_value,
+                            "em_gender": gender or False,
+                            "em_interests": interests,
+                        }
+                    )
+                    success = "Профиль успешно обновлен."
+
+            elif action == "change_password":
+                current_password = post.get("current_password") or ""
+                new_password = post.get("new_password") or ""
+                confirm_password = post.get("confirm_password") or ""
+
+                if not current_password or not new_password or not confirm_password:
+                    error = "Для смены пароля заполните все поля."
+                elif new_password != confirm_password:
+                    error = "Новый пароль и подтверждение не совпадают."
+                elif len(new_password) < 8:
+                    error = "Новый пароль должен содержать минимум 8 символов."
+                else:
+                    try:
+                        uid = self._authenticate(user.login, current_password)
+                    except AccessDenied:
+                        uid = False
+                    if uid != user.id:
+                        error = "Текущий пароль указан неверно."
+                    else:
+                        user.write({"password": new_password})
+                        success = "Пароль успешно изменен."
+
+        events = user.personal_event_ids.sorted(key=lambda e: e.date_start or fields.Datetime.now())
+        selected_interests = self._extract_partner_interest_values(profile)
+        profile_form_values = {
+            "full_name": profile.name or user.name or "",
+            "email": user.login or user.email or "",
+            "age": profile.em_age or "",
+            "gender": profile.em_gender or "",
+            "interests": selected_interests,
+        }
         gender_labels = {
             "male": "Мужской",
             "female": "Женский",
@@ -195,8 +290,12 @@ class EventMindController(http.Controller):
             {
                 "events": events,
                 "calendar_events_json": self._calendar_payload(events),
-                "profile": user.partner_id,
-                "gender_label": gender_labels.get(user.partner_id.em_gender, "-"),
+                "profile": profile,
+                "profile_form_values": profile_form_values,
+                "interest_tags": self.INTEREST_TAGS,
+                "gender_label": gender_labels.get(profile.em_gender, "-"),
+                "error": error,
+                "success": success,
             },
         )
 

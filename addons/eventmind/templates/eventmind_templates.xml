@@ -244,6 +244,85 @@
                     <div><strong>Интересы:</strong> <t t-esc="profile.em_interests or '-'"/></div>
                 </div>
 
+                <div t-if="error" class="alert alert-danger" role="alert">
+                    <t t-esc="error"/>
+                </div>
+                <div t-if="success" class="alert alert-success" role="alert">
+                    <t t-esc="success"/>
+                </div>
+
+                <div class="card p-3 mb-4">
+                    <h4 class="mb-3">Редактировать профиль</h4>
+                    <form action="/eventmind/cabinet" method="post">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <input type="hidden" name="action" value="update_profile"/>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="em_cabinet_name">ФИО</label>
+                            <input id="em_cabinet_name" type="text" name="full_name" class="form-control" required="required" t-att-value="(profile_form_values or {}).get('full_name', '')"/>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="em_cabinet_email">Email</label>
+                                <input id="em_cabinet_email" type="email" name="email" class="form-control" required="required" t-att-value="(profile_form_values or {}).get('email', '')"/>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label" for="em_cabinet_age">Возраст</label>
+                                <input id="em_cabinet_age" type="number" min="0" max="120" name="age" class="form-control" t-att-value="(profile_form_values or {}).get('age', '')"/>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label" for="em_cabinet_gender">Пол</label>
+                                <select id="em_cabinet_gender" name="gender" class="form-select">
+                                    <option value="" t-att-selected="'selected' if (profile_form_values or {}).get('gender') == '' else None">Не указан</option>
+                                    <option value="male" t-att-selected="'selected' if (profile_form_values or {}).get('gender') == 'male' else None">Мужской</option>
+                                    <option value="female" t-att-selected="'selected' if (profile_form_values or {}).get('gender') == 'female' else None">Женский</option>
+                                    <option value="other" t-att-selected="'selected' if (profile_form_values or {}).get('gender') == 'other' else None">Другой</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Интересы</label>
+                            <div class="em-interest-tags">
+                                <t t-foreach="interest_tags" t-as="tag" t-key="tag">
+                                    <label class="em-tag-option">
+                                        <input type="checkbox" name="interests" t-att-value="tag" t-att-checked="'checked' if tag in ((profile_form_values or {}).get('interests', [])) else None"/>
+                                        <span><t t-esc="tag"/></span>
+                                    </label>
+                                </t>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Сохранить профиль</button>
+                    </form>
+                </div>
+
+                <div class="card p-3 mb-4">
+                    <h4 class="mb-3">Сменить пароль</h4>
+                    <form action="/eventmind/cabinet" method="post">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <input type="hidden" name="action" value="change_password"/>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label" for="em_current_password">Текущий пароль</label>
+                                <input id="em_current_password" type="password" name="current_password" class="form-control" required="required"/>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label" for="em_new_password">Новый пароль</label>
+                                <input id="em_new_password" type="password" name="new_password" class="form-control" required="required"/>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label" for="em_confirm_password">Подтвердите пароль</label>
+                                <input id="em_confirm_password" type="password" name="confirm_password" class="form-control" required="required"/>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-outline-primary">Изменить пароль</button>
+                    </form>
+                </div>
+
                 <section class="em-calendar-section mb-4" data-em-calendar="">
                     <div class="em-calendar-header">
                         <h2 class="em-calendar-title mb-0">Мой календарь</h2>
