@@ -186,8 +186,14 @@ class EventMindController(http.Controller):
             }
         )
 
-        self._authenticate(login, password)
-        return request.redirect("/eventmind/cabinet")
+        try:
+            uid = self._authenticate(login, password)
+        except AccessDenied:
+            uid = False
+
+        if uid:
+            return request.redirect("/eventmind/cabinet")
+        return request.redirect("/eventmind/login")
 
     @http.route("/eventmind/cabinet", type="http", auth="user", website=True, methods=["GET", "POST"])
     def eventmind_cabinet(self, **post):
@@ -201,6 +207,7 @@ class EventMindController(http.Controller):
             if action == "update_profile":
                 full_name = (post.get("full_name") or "").strip()
                 email = (post.get("email") or "").strip().lower()
+                current_password_for_email = post.get("current_password_for_email") or ""
                 age_raw = (post.get("age") or "").strip()
                 gender = (post.get("gender") or "").strip()
                 selected_interests = self._extract_interest_values()
@@ -230,6 +237,18 @@ class EventMindController(http.Controller):
                     )
                     if duplicate:
                         error = "Пользователь с таким email уже существует."
+
+                email_changed = email != (user.login or "").lower()
+                if not error and email_changed:
+                    if not current_password_for_email:
+                        error = "Чтобы изменить email, введите текущий пароль."
+                    else:
+                        try:
+                            uid = self._authenticate(user.login, current_password_for_email)
+                        except AccessDenied:
+                            uid = False
+                        if uid != user.id:
+                            error = "Текущий пароль указан неверно. Email не изменен."
 
                 if not error:
                     user.write(
