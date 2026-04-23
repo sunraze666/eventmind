@@ -332,6 +332,13 @@ a.em-event-chip:hover {
     color: #637083;
 }
 
+.em-site-header {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
 .em-interest-tags {
     display: flex;
     flex-wrap: wrap;
@@ -386,6 +393,10 @@ a.em-event-chip:hover {
 }
 
 @media (max-width: 575px) {
+    .em-site-header {
+        justify-content: flex-start;
+    }
+
     .em-calendar-section {
         padding: 14px;
     }
