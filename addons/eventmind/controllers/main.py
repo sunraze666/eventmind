@@ -6,6 +6,21 @@ from odoo.http import request
 
 
 class EventMindController(http.Controller):
+    INTEREST_TAGS = [
+        "Программирование",
+        "Стартапы",
+        "Искусство",
+        "Маркетинг",
+        "Дизайн",
+        "AI и ML",
+        "Аналитика данных",
+        "Бизнес",
+        "Психология",
+        "Образование",
+        "Спорт",
+        "Нетворкинг",
+    ]
+
     @staticmethod
     def _serialize_event_for_calendar(event):
         start_dt = fields.Datetime.to_datetime(event.date_start)
@@ -69,15 +84,15 @@ class EventMindController(http.Controller):
         error = ""
 
         if not login or not password:
-            error = "Fill in email and password."
+            error = "Заполните email и пароль."
         else:
             try:
                 uid = self._authenticate(login, password)
                 if uid:
                     return request.redirect("/eventmind/cabinet")
-                error = "Invalid email or password."
+                error = "Неверный email или пароль."
             except AccessDenied:
-                error = "Invalid email or password."
+                error = "Неверный email или пароль."
 
         return request.render(
             "eventmind.eventmind_login_page",
@@ -90,7 +105,10 @@ class EventMindController(http.Controller):
     @http.route("/eventmind/signup", type="http", auth="public", website=True, methods=["GET", "POST"])
     def eventmind_signup(self, **post):
         if request.httprequest.method == "GET":
-            return request.render("eventmind.eventmind_signup_page", {"error": "", "values": {}})
+            return request.render(
+                "eventmind.eventmind_signup_page",
+                {"error": "", "values": {}, "interest_tags": self.INTEREST_TAGS},
+            )
 
         full_name = (post.get("full_name") or "").strip()
         login = (post.get("login") or "").strip().lower()
@@ -98,34 +116,37 @@ class EventMindController(http.Controller):
         password_confirm = post.get("password_confirm") or ""
         age_raw = (post.get("age") or "").strip()
         gender = (post.get("gender") or "").strip()
-        interests = (post.get("interests") or "").strip()
+        selected_interests = request.httprequest.form.getlist("interests")
+        selected_interests = [item.strip() for item in selected_interests if item and item.strip()]
+        selected_interests = [item for item in selected_interests if item in self.INTEREST_TAGS]
+        interests = ", ".join(selected_interests)
 
         values = {
             "full_name": full_name,
             "login": login,
             "age": age_raw,
             "gender": gender,
-            "interests": interests,
+            "interests": selected_interests,
         }
 
         error = ""
         age = 0
         if not full_name or not login or not password:
-            error = "Full name, email, and password are required."
+            error = "ФИО, email и пароль обязательны."
         elif password != password_confirm:
-            error = "Passwords do not match."
+            error = "Пароли не совпадают."
         else:
             if age_raw:
                 try:
                     age = int(age_raw)
                 except ValueError:
-                    error = "Age must be a number."
+                    error = "Возраст должен быть числом."
                 if age < 0 or age > 120:
-                    error = "Age must be between 0 and 120."
+                    error = "Возраст должен быть от 0 до 120."
 
         users = request.env["res.users"].sudo()
         if not error and users.search_count([("login", "=", login)]):
-            error = "A user with this email already exists."
+            error = "Пользователь с таким email уже существует."
 
         if error:
             return request.render(
@@ -133,6 +154,7 @@ class EventMindController(http.Controller):
                 {
                     "error": error,
                     "values": values,
+                    "interest_tags": self.INTEREST_TAGS,
                 },
             )
 
@@ -164,9 +186,9 @@ class EventMindController(http.Controller):
         user = request.env.user
         events = user.sudo().personal_event_ids.sorted(key=lambda e: e.date_start or fields.Datetime.now())
         gender_labels = {
-            "male": "Male",
-            "female": "Female",
-            "other": "Other",
+            "male": "Мужской",
+            "female": "Женский",
+            "other": "Другой",
         }
         return request.render(
             "eventmind.eventmind_cabinet_page",

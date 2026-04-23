@@ -332,6 +332,43 @@ a.em-event-chip:hover {
     color: #637083;
 }
 
+.em-interest-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.em-tag-option {
+    position: relative;
+    margin: 0;
+}
+
+.em-tag-option input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.em-tag-option span {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid #d0d7e6;
+    background: #f8fafe;
+    color: #2e3a57;
+    font-size: 0.88rem;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.15s ease;
+}
+
+.em-tag-option input[type="checkbox"]:checked + span {
+    background: #6d5cae;
+    border-color: #6d5cae;
+    color: #fff;
+}
+
 @media (max-width: 1199px) {
     .em-year-grid {
         grid-template-columns: repeat(3, minmax(220px, 1fr));
