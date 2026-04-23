@@ -1,11 +1,17 @@
 <odoo>
     <template id="eventmind_site_header" name="EventMind Site Header">
         <div class="em-site-header mb-4">
-            <a href="/eventmind/events" class="em-home-btn">Главная</a>
+            <a href="/eventmind/events" class="em-brand-link">EventMind</a>
             <div class="em-site-header-actions">
-                <a href="/eventmind/signup" class="btn btn-outline-secondary">Регистрация</a>
-                <a href="/eventmind/login" class="btn btn-primary">Вход</a>
-                <a href="/eventmind/cabinet" class="btn btn-outline-primary">Мой кабинет</a>
+                <a href="/eventmind/events" class="em-nav-link">Главная</a>
+                <t t-if="request.env.user._is_public()">
+                    <a href="/eventmind/signup" class="em-nav-link">Регистрация</a>
+                    <a href="/eventmind/login" class="em-nav-link em-nav-link-primary">Вход</a>
+                </t>
+                <t t-else="">
+                    <a href="/eventmind/cabinet" class="em-nav-link">Мой кабинет</a>
+                    <a href="/web/session/logout?redirect=/eventmind/events" class="em-nav-link">Выйти</a>
+                </t>
             </div>
         </div>
     </template>
@@ -233,7 +239,6 @@
                         <h1 class="mb-1">Личный кабинет</h1>
                         <p class="text-muted mb-0">Добро пожаловать, <t t-esc="profile.name"/>.</p>
                     </div>
-                    <a href="/web/session/logout?redirect=/eventmind/login" class="btn btn-outline-secondary">Выйти</a>
                 </div>
 
                 <div class="card p-3 mb-4">

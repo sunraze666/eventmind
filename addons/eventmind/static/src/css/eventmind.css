@@ -338,28 +338,25 @@ a.em-event-chip:hover {
     gap: 10px;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 12px;
-    border: 1px solid #e3e5eb;
-    border-radius: 14px;
-    background: linear-gradient(180deg, #ffffff 0%, #fbfcff 100%);
+    padding: 10px 14px;
+    border: 1px solid #e5e8f0;
+    border-radius: 12px;
+    background: #fff;
 }
 
-.em-home-btn {
+.em-brand-link {
     display: inline-flex;
     align-items: center;
-    padding: 7px 14px;
-    border-radius: 999px;
-    border: 1px solid #6d5cae;
-    background: #6d5cae;
-    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    color: #1f2a44;
     text-decoration: none;
-    font-weight: 600;
 }
 
-.em-home-btn:hover {
-    background: #5c4e92;
-    border-color: #5c4e92;
-    color: #fff;
+.em-brand-link:hover {
+    color: #1f2a44;
+    text-decoration: none;
 }
 
 .em-site-header-actions {
@@ -367,6 +364,40 @@ a.em-event-chip:hover {
     flex-wrap: wrap;
     justify-content: flex-end;
     gap: 8px;
+}
+
+.em-nav-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid #d7ddea;
+    background: #fff;
+    color: #2f3a55;
+    font-size: 0.88rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.em-nav-link:hover {
+    background: #f7f9fc;
+    border-color: #c9d3e6;
+    color: #1f2a44;
+    text-decoration: none;
+}
+
+.em-nav-link-primary {
+    border-color: #6d5cae;
+    background: #6d5cae;
+    color: #fff;
+}
+
+.em-nav-link-primary:hover {
+    background: #5d4e95;
+    border-color: #5d4e95;
+    color: #fff;
 }
 
 .em-interest-tags {
@@ -436,7 +467,7 @@ a.em-event-chip:hover {
         align-items: stretch;
     }
 
-    .em-home-btn {
+    .em-brand-link {
         justify-content: center;
     }
 
@@ -444,7 +475,7 @@ a.em-event-chip:hover {
         justify-content: stretch;
     }
 
-    .em-site-header-actions .btn {
+    .em-site-header-actions .em-nav-link {
         width: 100%;
     }
 
