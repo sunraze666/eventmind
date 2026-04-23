@@ -406,6 +406,14 @@ a.em-event-chip:hover {
     color: #fff;
 }
 
+.em-profile-editor summary {
+    list-style: none;
+}
+
+.em-profile-editor summary::-webkit-details-marker {
+    display: none;
+}
+
 @media (max-width: 1199px) {
     .em-year-grid {
         grid-template-columns: repeat(3, minmax(220px, 1fr));
