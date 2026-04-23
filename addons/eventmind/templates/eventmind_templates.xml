@@ -2,28 +2,40 @@
     <template id="eventmind_events_page" name="EventMind Events Page">
         <t t-call="website.layout">
             <div class="container my-5">
-                <h1 class="mb-4">События EventMind</h1>
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+                    <h1 class="mb-0">EventMind events</h1>
+                    <div class="d-flex gap-2">
+                        <a href="/eventmind/cabinet" class="btn btn-outline-primary">My cabinet</a>
+                        <t t-if="request.env.user._is_public()">
+                            <a href="/eventmind/login" class="btn btn-primary">Login</a>
+                            <a href="/eventmind/signup" class="btn btn-outline-secondary">Sign up</a>
+                        </t>
+                        <t t-else="">
+                            <a href="/web/session/logout?redirect=/eventmind/events" class="btn btn-outline-secondary">Logout</a>
+                        </t>
+                    </div>
+                </div>
 
                 <section class="em-calendar-section mb-5" data-em-calendar="">
                     <div class="em-calendar-header">
-                        <h2 class="em-calendar-title mb-0">Календарь событий</h2>
+                        <h2 class="em-calendar-title mb-0">Events calendar</h2>
                         <div class="em-calendar-nav">
-                            <button type="button" class="btn btn-outline-secondary btn-sm" data-em-nav="prev">←</button>
-                            <button type="button" class="btn btn-outline-secondary btn-sm" data-em-nav="today">Сегодня</button>
-                            <button type="button" class="btn btn-outline-secondary btn-sm" data-em-nav="next">→</button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" data-em-nav="prev">&lt;</button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" data-em-nav="today">Today</button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" data-em-nav="next">&gt;</button>
                         </div>
                     </div>
 
                     <div class="em-calendar-toolbar">
-                        <div class="em-view-switch" role="tablist" aria-label="Вид календаря">
-                            <button type="button" class="btn btn-sm btn-primary" data-em-view="year">Год</button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary" data-em-view="month">Месяц</button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary" data-em-view="week">Неделя</button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary" data-em-view="day">День</button>
+                        <div class="em-view-switch" role="tablist" aria-label="Calendar view mode">
+                            <button type="button" class="btn btn-sm btn-primary" data-em-view="year">Year</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-em-view="month">Month</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-em-view="week">Week</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-em-view="day">Day</button>
                         </div>
-                        <div class="em-density-switch" role="tablist" aria-label="Плотность событий">
-                            <button type="button" class="btn btn-sm btn-primary" data-em-density="tone">Оттенки</button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary" data-em-density="count">Цифры</button>
+                        <div class="em-density-switch" role="tablist" aria-label="Events density mode">
+                            <button type="button" class="btn btn-sm btn-primary" data-em-density="tone">Tone</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-em-density="count">Count</button>
                         </div>
                         <div class="em-calendar-current" data-em-current-label=""></div>
                     </div>
@@ -31,7 +43,7 @@
                     <div class="em-calendar-body" data-em-calendar-body=""></div>
 
                     <script id="em-calendar-events" type="application/json"><t t-raw="calendar_events_json"/></script>
-                    <p class="em-calendar-note mb-0">Режим "Оттенки" показывает нагрузку по дням цветом, "Цифры" - точным количеством.</p>
+                    <p class="em-calendar-note mb-0">Tone mode colors a day by load; Count mode shows exact number of events.</p>
                 </section>
 
                 <div class="row">
@@ -41,22 +53,22 @@
                                 <h4><t t-esc="event.name"/></h4>
 
                                 <p>
-                                    <strong>Дата:</strong>
+                                    <strong>Date:</strong>
                                     <t t-esc="event.date_start"/>
                                 </p>
 
                                 <p>
-                                    <strong>Место:</strong>
+                                    <strong>Location:</strong>
                                     <t t-esc="event.location"/>
                                 </p>
 
                                 <p t-if="event.price">
-                                    <strong>Цена:</strong>
+                                    <strong>Price:</strong>
                                     <t t-esc="event.price"/>
                                 </p>
 
                                 <p t-if="event.age_limit">
-                                    <strong>Возраст:</strong>
+                                    <strong>Age:</strong>
                                     <t t-esc="event.age_limit"/>
                                 </p>
 
@@ -65,13 +77,214 @@
                                     <t t-if="len(event.description) > 180">...</t>
                                 </p>
 
-                                <a t-if="event.source_url"
-                                   t-att-href="event.source_url"
-                                   target="_blank"
-                                   class="btn btn-primary">
-                                    Открыть источник
-                                </a>
+                                <div class="d-flex flex-wrap gap-2 mt-auto">
+                                    <a t-if="event.source_url"
+                                       t-att-href="event.source_url"
+                                       target="_blank"
+                                       class="btn btn-primary">
+                                        Open source
+                                    </a>
+
+                                    <t t-if="request.env.user._is_public()">
+                                        <a href="/eventmind/login" class="btn btn-outline-primary">Login to add</a>
+                                    </t>
+                                    <t t-else="">
+                                        <t t-if="event.id in user_event_ids">
+                                            <form t-att-action="'/eventmind/cabinet/calendar/remove/%s' % event.id" method="post" class="d-inline">
+                                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                                <input type="hidden" name="redirect" value="/eventmind/events"/>
+                                                <button type="submit" class="btn btn-outline-danger">Remove from my calendar</button>
+                                            </form>
+                                        </t>
+                                        <t t-else="">
+                                            <form t-att-action="'/eventmind/cabinet/calendar/add/%s' % event.id" method="post" class="d-inline">
+                                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                                <input type="hidden" name="redirect" value="/eventmind/events"/>
+                                                <button type="submit" class="btn btn-outline-success">Add to my calendar</button>
+                                            </form>
+                                        </t>
+                                    </t>
+                                </div>
                             </div>
+                        </div>
+                    </t>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="eventmind_login_page" name="EventMind Login Page">
+        <t t-call="website.layout">
+            <div class="container my-5" style="max-width: 560px;">
+                <h1 class="mb-3">Login</h1>
+                <p class="text-muted">Use your EventMind account to open personal cabinet and calendar.</p>
+
+                <div t-if="error" class="alert alert-danger" role="alert">
+                    <t t-esc="error"/>
+                </div>
+
+                <form action="/eventmind/login" method="post" class="card p-4 shadow-sm">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="em_login_email">Email</label>
+                        <input id="em_login_email" type="email" name="login" class="form-control" required="required" t-att-value="login or ''"/>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="em_login_password">Password</label>
+                        <input id="em_login_password" type="password" name="password" class="form-control" required="required"/>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Login</button>
+                </form>
+
+                <div class="mt-3">
+                    <a href="/eventmind/signup">No account? Register</a>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="eventmind_signup_page" name="EventMind Signup Page">
+        <t t-call="website.layout">
+            <div class="container my-5" style="max-width: 700px;">
+                <h1 class="mb-3">Registration</h1>
+                <p class="text-muted">Fill profile once: this data will be used for personal recommendations.</p>
+
+                <div t-if="error" class="alert alert-danger" role="alert">
+                    <t t-esc="error"/>
+                </div>
+
+                <form action="/eventmind/signup" method="post" class="card p-4 shadow-sm">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="em_signup_name">Full name</label>
+                        <input id="em_signup_name" type="text" name="full_name" class="form-control" required="required" t-att-value="(values or {}).get('full_name', '')"/>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="em_signup_email">Email</label>
+                        <input id="em_signup_email" type="email" name="login" class="form-control" required="required" t-att-value="(values or {}).get('login', '')"/>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label" for="em_signup_password">Password</label>
+                            <input id="em_signup_password" type="password" name="password" class="form-control" required="required"/>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label" for="em_signup_password_confirm">Repeat password</label>
+                            <input id="em_signup_password_confirm" type="password" name="password_confirm" class="form-control" required="required"/>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label" for="em_signup_age">Age</label>
+                            <input id="em_signup_age" type="number" min="0" max="120" name="age" class="form-control" t-att-value="(values or {}).get('age', '')"/>
+                        </div>
+                        <div class="col-md-8 mb-3">
+                            <label class="form-label" for="em_signup_gender">Gender</label>
+                            <select id="em_signup_gender" name="gender" class="form-select">
+                                <option value="">Not specified</option>
+                                <option value="male" t-att-selected="'selected' if (values or {}).get('gender') == 'male' else None">Male</option>
+                                <option value="female" t-att-selected="'selected' if (values or {}).get('gender') == 'female' else None">Female</option>
+                                <option value="other" t-att-selected="'selected' if (values or {}).get('gender') == 'other' else None">Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="em_signup_interests">Interests</label>
+                        <textarea id="em_signup_interests" name="interests" rows="4" class="form-control" placeholder="AI, startups, product management, UX..."><t t-esc="(values or {}).get('interests', '')"/></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Create account</button>
+                </form>
+
+                <div class="mt-3">
+                    <a href="/eventmind/login">Already have an account? Login</a>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="eventmind_cabinet_page" name="EventMind Cabinet Page">
+        <t t-call="website.layout">
+            <div class="container my-5">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+                    <div>
+                        <h1 class="mb-1">Personal cabinet</h1>
+                        <p class="text-muted mb-0">Welcome, <t t-esc="profile.name"/>.</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="/eventmind/events" class="btn btn-outline-primary">All events</a>
+                        <a href="/web/session/logout?redirect=/eventmind/login" class="btn btn-outline-secondary">Logout</a>
+                    </div>
+                </div>
+
+                <div class="card p-3 mb-4">
+                    <h4 class="mb-3">Profile</h4>
+                    <div><strong>Full name:</strong> <t t-esc="profile.name or '-'"/></div>
+                    <div><strong>Age:</strong> <t t-esc="profile.em_age or '-'"/></div>
+                    <div><strong>Gender:</strong> <t t-esc="gender_label"/></div>
+                    <div><strong>Interests:</strong> <t t-esc="profile.em_interests or '-'"/></div>
+                </div>
+
+                <section class="em-calendar-section mb-4" data-em-calendar="">
+                    <div class="em-calendar-header">
+                        <h2 class="em-calendar-title mb-0">My calendar</h2>
+                        <div class="em-calendar-nav">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" data-em-nav="prev">&lt;</button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" data-em-nav="today">Today</button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" data-em-nav="next">&gt;</button>
+                        </div>
+                    </div>
+
+                    <div class="em-calendar-toolbar">
+                        <div class="em-view-switch" role="tablist" aria-label="Calendar view mode">
+                            <button type="button" class="btn btn-sm btn-primary" data-em-view="year">Year</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-em-view="month">Month</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-em-view="week">Week</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-em-view="day">Day</button>
+                        </div>
+                        <div class="em-density-switch" role="tablist" aria-label="Events density mode">
+                            <button type="button" class="btn btn-sm btn-primary" data-em-density="tone">Tone</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-em-density="count">Count</button>
+                        </div>
+                        <div class="em-calendar-current" data-em-current-label=""></div>
+                    </div>
+
+                    <div class="em-calendar-body" data-em-calendar-body=""></div>
+
+                    <script id="em-calendar-events" type="application/json"><t t-raw="calendar_events_json"/></script>
+                </section>
+
+                <h3 class="mb-3">Events in my calendar</h3>
+                <div class="row">
+                    <t t-if="events">
+                        <t t-foreach="events" t-as="event" t-key="event.id">
+                            <div class="col-md-4 mb-4">
+                                <div class="card h-100 shadow-sm p-3">
+                                    <h4><t t-esc="event.name"/></h4>
+                                    <p><strong>Date:</strong> <t t-esc="event.date_start"/></p>
+                                    <p><strong>Location:</strong> <t t-esc="event.location or '-'"/></p>
+                                    <div class="d-flex gap-2 mt-auto">
+                                        <a t-if="event.source_url" t-att-href="event.source_url" target="_blank" class="btn btn-primary">Details</a>
+                                        <form t-att-action="'/eventmind/cabinet/calendar/remove/%s' % event.id" method="post" class="d-inline">
+                                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                            <button type="submit" class="btn btn-outline-danger">Remove</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </t>
+                    <t t-else="">
+                        <div class="col-12">
+                            <div class="alert alert-info">Your calendar is empty. Open all events and add interesting ones.</div>
                         </div>
                     </t>
                 </div>

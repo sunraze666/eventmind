@@ -1,5 +1,6 @@
-from odoo import models, fields, api
 import json
+
+from odoo import api, fields, models
 
 
 class EventMindEvent(models.Model):
@@ -7,11 +8,11 @@ class EventMindEvent(models.Model):
     _description = "EventMind Event"
     _order = "date_start asc"
 
-    name = fields.Char(string="Название", required=True)
-    description = fields.Text(string="Описание")
-    date_start = fields.Datetime(string="Дата и время", required=True)
-    date_end = fields.Datetime(string="Дата окончания")
-    location = fields.Char(string="Место")
+    name = fields.Char(string="Name", required=True)
+    description = fields.Text(string="Description")
+    date_start = fields.Datetime(string="Start", required=True)
+    date_end = fields.Datetime(string="End")
+    location = fields.Char(string="Location")
     category = fields.Selection(
         [
             ("conference", "Conference"),
@@ -20,20 +21,20 @@ class EventMindEvent(models.Model):
             ("education", "Education"),
             ("other", "Other"),
         ],
-        string="Категория",
+        string="Category",
         default="other",
         required=True,
     )
-    is_recommended = fields.Boolean(string="Рекомендовано", default=False)
-    seats = fields.Integer(string="Количество мест")
+    is_recommended = fields.Boolean(string="Recommended", default=False)
+    seats = fields.Integer(string="Seats")
     status = fields.Selection(
         [
-            ("draft", "Черновик"),
-            ("planned", "Запланировано"),
-            ("done", "Завершено"),
-            ("cancelled", "Отменено"),
+            ("draft", "Draft"),
+            ("planned", "Planned"),
+            ("done", "Done"),
+            ("cancelled", "Cancelled"),
         ],
-        string="Статус",
+        string="Status",
         default="planned",
         required=True,
     )
@@ -43,18 +44,31 @@ class EventMindEvent(models.Model):
             ("manual", "Manual"),
             ("timepad", "Timepad"),
         ],
-        string="Источник",
+        string="Source",
         default="manual",
         required=True,
     )
-    source_url = fields.Char(string="Ссылка на источник")
-    external_id = fields.Char(string="Внешний ID", index=True)
-    price = fields.Char(string="Цена")
-    age_limit = fields.Char(string="Возрастное ограничение")
+    source_url = fields.Char(string="Source URL")
+    external_id = fields.Char(string="External ID", index=True)
+    price = fields.Char(string="Price")
+    age_limit = fields.Char(string="Age Limit")
+    attendee_ids = fields.Many2many(
+        "res.users",
+        "eventmind_event_user_rel",
+        "event_id",
+        "user_id",
+        string="Users in personal calendar",
+    )
+    attendee_count = fields.Integer(string="Users Count", compute="_compute_attendee_count")
 
     _sql_constraints = [
         ("eventmind_event_external_id_uniq", "unique(external_id)", "External ID must be unique."),
     ]
+
+    @api.depends("attendee_ids")
+    def _compute_attendee_count(self):
+        for record in self:
+            record.attendee_count = len(record.attendee_ids)
 
     @api.model
     def _normalize_datetime_value(self, value):
@@ -74,7 +88,7 @@ class EventMindEvent(models.Model):
             date_end = self._normalize_datetime_value(item.get("date_end")) or date_start
 
             vals = {
-                "name": item.get("name") or "Без названия",
+                "name": item.get("name") or "Untitled event",
                 "description": item.get("description") or "",
                 "date_start": date_start or fields.Datetime.now(),
                 "date_end": date_end or fields.Datetime.now(),
@@ -95,3 +109,30 @@ class EventMindEvent(models.Model):
                 self.create(vals)
 
         return True
+
+
+class EventMindPartner(models.Model):
+    _inherit = "res.partner"
+
+    em_age = fields.Integer(string="Age")
+    em_gender = fields.Selection(
+        [
+            ("male", "Male"),
+            ("female", "Female"),
+            ("other", "Other"),
+        ],
+        string="Gender",
+    )
+    em_interests = fields.Text(string="Interests")
+
+
+class EventMindUsers(models.Model):
+    _inherit = "res.users"
+
+    personal_event_ids = fields.Many2many(
+        "eventmind.event",
+        "eventmind_event_user_rel",
+        "user_id",
+        "event_id",
+        string="My calendar events",
+    )

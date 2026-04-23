@@ -3,7 +3,7 @@
     "version": "1.0",
     "summary": "Smart event assistant",
     "category": "Productivity",
-    "depends": ["base", "web", "website"],
+    "depends": ["base", "web", "website", "auth_signup", "portal"],
     "data": [
         "security/ir.model.access.csv",
         "views/event_views.xml",

@@ -8,9 +8,23 @@
 
     <menuitem
         id="menu_eventmind_events"
-        name="События"
+        name="Events"
         parent="menu_eventmind_root"
         action="action_eventmind_event"
         sequence="1"
     />
+
+    <record id="eventmind_website_menu_events" model="website.menu">
+        <field name="name">Events</field>
+        <field name="url">/eventmind/events</field>
+        <field name="parent_id" ref="website.main_menu"/>
+        <field name="sequence" eval="80"/>
+    </record>
+
+    <record id="eventmind_website_menu_cabinet" model="website.menu">
+        <field name="name">My Cabinet</field>
+        <field name="url">/eventmind/cabinet</field>
+        <field name="parent_id" ref="website.main_menu"/>
+        <field name="sequence" eval="81"/>
+    </record>
 </odoo>
