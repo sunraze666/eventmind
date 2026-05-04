@@ -9,6 +9,7 @@
                     <a href="/eventmind/login" class="em-nav-link em-nav-link-primary">Вход</a>
                 </t>
                 <t t-else="">
+                    <a href="/eventmind/recommendations" class="em-nav-link">Recommendations</a>
                     <a href="/eventmind/cabinet" class="em-nav-link">Мой кабинет</a>
                     <a href="/web/session/logout?redirect=/eventmind/events" class="em-nav-link">Выйти</a>
                 </t>
@@ -111,6 +112,64 @@
                                             </form>
                                         </t>
                                     </t>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="eventmind_recommendations_page" name="EventMind Recommendations Page">
+        <t t-call="website.layout">
+            <t t-set="no_header" t-value="True"/>
+            <div class="container my-5">
+                <t t-call="eventmind.eventmind_site_header"/>
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+                    <div>
+                        <h1 class="mb-1">Recommendations</h1>
+                        <p class="text-muted mb-0">Personal event suggestions based on your interests and calendar.</p>
+                    </div>
+                    <a href="/eventmind/cabinet" class="btn btn-outline-primary">Edit profile</a>
+                </div>
+
+                <div t-if="selected_interests" class="mb-4">
+                    <div class="em-interest-tags">
+                        <t t-foreach="selected_interests" t-as="interest" t-key="interest">
+                            <span class="em-interest-pill"><t t-esc="interest"/></span>
+                        </t>
+                    </div>
+                </div>
+
+                <div t-if="not has_profile_data" class="alert alert-info" role="alert">
+                    Add interests in your profile or save a few events to your calendar to get personal recommendations.
+                </div>
+
+                <div t-elif="not recommendation_items" class="alert alert-info" role="alert">
+                    No recommendations yet. Add more interests or upcoming events to your calendar.
+                </div>
+
+                <div t-if="recommendation_items" class="row">
+                    <t t-foreach="recommendation_items" t-as="item" t-key="item.event.id">
+                        <t t-set="event" t-value="item.event"/>
+                        <div class="col-md-4 mb-4">
+                            <div class="card h-100 shadow-sm p-3 em-recommendation-card">
+                                <div class="d-flex justify-content-between gap-2 mb-2">
+                                    <h4 class="mb-0"><t t-esc="event.name"/></h4>
+                                    <span class="badge bg-success">AI</span>
+                                </div>
+                                <p class="text-muted mb-2">Score: <t t-esc="item.score"/></p>
+                                <p><strong>Date:</strong> <t t-esc="event.date_start"/></p>
+                                <p><strong>Place:</strong> <t t-esc="event.location or '-'"/></p>
+                                <p class="text-muted"><t t-esc="item.reason"/></p>
+                                <div class="d-flex flex-wrap gap-2 mt-auto">
+                                    <a t-if="event.source_url" t-att-href="event.source_url" target="_blank" class="btn btn-primary">Details</a>
+                                    <form t-att-action="'/eventmind/cabinet/calendar/add/%s' % event.id" method="post" class="d-inline">
+                                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                        <input type="hidden" name="redirect" value="/eventmind/recommendations"/>
+                                        <button type="submit" class="btn btn-outline-success">Add to calendar</button>
+                                    </form>
                                 </div>
                             </div>
                         </div>

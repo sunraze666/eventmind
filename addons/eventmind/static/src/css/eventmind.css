@@ -437,6 +437,17 @@ a.em-event-chip:hover {
     color: #fff;
 }
 
+.em-interest-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid #d0d7e6;
+    background: #f8fafe;
+    color: #2e3a57;
+    font-size: 0.88rem;
+}
+
 .em-profile-editor summary {
     list-style: none;
 }

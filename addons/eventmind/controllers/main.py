@@ -102,6 +102,25 @@ class EventMindController(http.Controller):
             },
         )
 
+    @http.route("/eventmind/recommendations", type="http", auth="user", website=True)
+    def eventmind_recommendations(self, **kwargs):
+        user = request.env.user.sudo()
+        events = request.env["eventmind.event"].sudo().search(
+            [("status", "!=", "cancelled")],
+            order="date_start asc",
+        )
+        recommendation_items = self._recommendations_for(user, events, top_k=12)
+        selected_interests = self._extract_partner_interest_values(user.partner_id.sudo())
+
+        return request.render(
+            "eventmind.eventmind_recommendations_page",
+            {
+                "recommendation_items": recommendation_items,
+                "selected_interests": selected_interests,
+                "has_profile_data": bool(selected_interests or user.personal_event_ids),
+            },
+        )
+
     @http.route("/eventmind/login", type="http", auth="public", website=True, methods=["GET", "POST"])
     def eventmind_login(self, **post):
         if request.httprequest.method == "GET":
