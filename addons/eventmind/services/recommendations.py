@@ -87,7 +87,10 @@ class EventRecommendationEngine:
 
         model = _try_get_model()
         if model:
-            scored = self._rank_with_embeddings(model, profile_items, candidates)
+            try:
+                scored = self._rank_with_embeddings(model, profile_items, candidates)
+            except Exception:
+                scored = self._rank_with_keywords(profile_items, candidates)
         else:
             scored = self._rank_with_keywords(profile_items, candidates)
 

@@ -1,9 +1,14 @@
 import json
+import logging
 
 from odoo import fields, http
-from odoo.addons.eventmind.services.recommendations import EventRecommendationEngine
 from odoo.exceptions import AccessDenied
 from odoo.http import request
+
+from ..services.recommendations import EventRecommendationEngine
+
+
+_logger = logging.getLogger(__name__)
 
 
 class EventMindController(http.Controller):
@@ -69,7 +74,11 @@ class EventMindController(http.Controller):
     def _recommendations_for(user, events, top_k=6):
         if user._is_public():
             return []
-        return EventRecommendationEngine(top_k=top_k).recommend_for_user(user.sudo(), events.sudo())
+        try:
+            return EventRecommendationEngine(top_k=top_k).recommend_for_user(user.sudo(), events.sudo())
+        except Exception:
+            _logger.exception("EventMind recommendations failed")
+            return []
 
     @http.route("/eventmind/events", type="http", auth="public", website=True)
     def eventmind_events(self, **kwargs):
