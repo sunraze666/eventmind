@@ -1,5 +1,6 @@
 import json
 import logging
+from types import SimpleNamespace
 
 from odoo import fields, http
 from odoo.exceptions import AccessDenied
@@ -75,10 +76,11 @@ class EventMindController(http.Controller):
         if user._is_public():
             return []
         try:
-            return EventRecommendationEngine(top_k=top_k).recommend_for_user(user.sudo(), events.sudo())
+            items = EventRecommendationEngine(top_k=top_k).recommend_for_user(user.sudo(), events.sudo())
         except Exception:
             _logger.exception("EventMind recommendations failed")
             return []
+        return [SimpleNamespace(**item) for item in items]
 
     @http.route("/eventmind/events", type="http", auth="public", website=True)
     def eventmind_events(self, **kwargs):
@@ -99,7 +101,7 @@ class EventMindController(http.Controller):
                 "events": events,
                 "user_event_ids": user_event_ids,
                 "recommendation_items": recommendation_items,
-                "recommended_event_ids": [item["event"].id for item in recommendation_items],
+                "recommended_event_ids": [item.event.id for item in recommendation_items],
                 "calendar_events_json": self._calendar_payload(events),
             },
         )
