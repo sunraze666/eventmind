@@ -53,43 +53,11 @@
                     <p class="em-calendar-note mb-0">Режим «Оттенок» подсвечивает загруженность дня, режим «Число» показывает количество событий.</p>
                 </section>
 
-                <section t-if="recommendation_items" class="mb-5">
-                    <h2 class="mb-3">Recommended for you</h2>
-                    <div class="row">
-                        <t t-foreach="recommendation_items" t-as="item" t-key="item.event.id">
-                            <t t-set="event" t-value="item.event"/>
-                            <div class="col-md-4 mb-4">
-                                <div class="card h-100 shadow-sm p-3 em-recommendation-card">
-                                    <div class="d-flex justify-content-between gap-2 mb-2">
-                                        <h4 class="mb-0"><t t-esc="event.name"/></h4>
-                                        <span class="badge bg-success">AI</span>
-                                    </div>
-                                    <p class="text-muted mb-2">Score: <t t-esc="item.score"/></p>
-                                    <p><strong>Date:</strong> <t t-esc="event.date_start"/></p>
-                                    <p><strong>Place:</strong> <t t-esc="event.location or '-'"/></p>
-                                    <p class="text-muted"><t t-esc="item.reason"/></p>
-                                    <div class="d-flex flex-wrap gap-2 mt-auto">
-                                        <a t-if="event.source_url" t-att-href="event.source_url" target="_blank" class="btn btn-primary">Details</a>
-                                        <form t-att-action="'/eventmind/cabinet/calendar/add/%s' % event.id" method="post" class="d-inline">
-                                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                                            <input type="hidden" name="redirect" value="/eventmind/events"/>
-                                            <button type="submit" class="btn btn-outline-success">Add to calendar</button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </t>
-                    </div>
-                </section>
-
                 <div class="row">
                     <t t-foreach="events" t-as="event" t-key="event.id">
                         <div class="col-md-4 mb-4">
                             <div class="card h-100 shadow-sm p-3">
-                                <div class="d-flex justify-content-between gap-2">
-                                    <h4><t t-esc="event.name"/></h4>
-                                    <span t-if="event.id in recommended_event_ids" class="badge bg-success align-self-start">AI</span>
-                                </div>
+                                <h4><t t-esc="event.name"/></h4>
 
                                 <p>
                                     <strong>Дата:</strong>

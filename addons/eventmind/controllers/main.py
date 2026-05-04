@@ -90,18 +90,14 @@ class EventMindController(http.Controller):
         )
 
         user_event_ids = []
-        recommendation_items = []
         if not request.env.user._is_public():
             user_event_ids = request.env.user.sudo().personal_event_ids.ids
-            recommendation_items = self._recommendations_for(request.env.user, events)
 
         return request.render(
             "eventmind.eventmind_events_page",
             {
                 "events": events,
                 "user_event_ids": user_event_ids,
-                "recommendation_items": recommendation_items,
-                "recommended_event_ids": [item.event.id for item in recommendation_items],
                 "calendar_events_json": self._calendar_payload(events),
             },
         )
