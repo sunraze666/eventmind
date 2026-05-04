@@ -1,6 +1,7 @@
 import json
 
 from odoo import fields, http
+from odoo.addons.eventmind.services.recommendations import EventRecommendationEngine
 from odoo.exceptions import AccessDenied
 from odoo.http import request
 
@@ -64,6 +65,12 @@ class EventMindController(http.Controller):
         raw = partner.em_interests or ""
         return [item.strip() for item in raw.split(",") if item.strip()]
 
+    @staticmethod
+    def _recommendations_for(user, events, top_k=6):
+        if user._is_public():
+            return []
+        return EventRecommendationEngine(top_k=top_k).recommend_for_user(user.sudo(), events.sudo())
+
     @http.route("/eventmind/events", type="http", auth="public", website=True)
     def eventmind_events(self, **kwargs):
         events = request.env["eventmind.event"].sudo().search(
@@ -72,14 +79,18 @@ class EventMindController(http.Controller):
         )
 
         user_event_ids = []
+        recommendation_items = []
         if not request.env.user._is_public():
             user_event_ids = request.env.user.sudo().personal_event_ids.ids
+            recommendation_items = self._recommendations_for(request.env.user, events)
 
         return request.render(
             "eventmind.eventmind_events_page",
             {
                 "events": events,
                 "user_event_ids": user_event_ids,
+                "recommendation_items": recommendation_items,
+                "recommended_event_ids": [item["event"].id for item in recommendation_items],
                 "calendar_events_json": self._calendar_payload(events),
             },
         )
@@ -291,6 +302,11 @@ class EventMindController(http.Controller):
                         success = "Пароль успешно изменен."
 
         events = user.personal_event_ids.sorted(key=lambda e: e.date_start or fields.Datetime.now())
+        recommendation_source = request.env["eventmind.event"].sudo().search(
+            [("status", "!=", "cancelled")],
+            order="date_start asc",
+        )
+        recommendation_items = self._recommendations_for(user, recommendation_source)
         selected_interests = self._extract_partner_interest_values(profile)
         profile_form_values = {
             "full_name": profile.name or user.name or "",
@@ -308,6 +324,7 @@ class EventMindController(http.Controller):
             "eventmind.eventmind_cabinet_page",
             {
                 "events": events,
+                "recommendation_items": recommendation_items,
                 "calendar_events_json": self._calendar_payload(events),
                 "profile": profile,
                 "profile_form_values": profile_form_values,

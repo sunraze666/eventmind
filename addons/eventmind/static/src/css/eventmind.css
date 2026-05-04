@@ -445,6 +445,15 @@ a.em-event-chip:hover {
     display: none;
 }
 
+.em-recommendation-card {
+    border-color: #cfe6dc;
+    background: #fbfffd;
+}
+
+.em-recommendation-card .badge {
+    height: fit-content;
+}
+
 @media (max-width: 1199px) {
     .em-year-grid {
         grid-template-columns: repeat(3, minmax(220px, 1fr));
