@@ -6,6 +6,7 @@
     "depends": ["base", "web", "website", "auth_signup", "portal"],
     "data": [
         "security/ir.model.access.csv",
+        "data/timepad_events.xml",
         "views/event_views.xml",
         "views/menu.xml",
         "templates/eventmind_templates.xml",
