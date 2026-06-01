@@ -1,7 +1,11 @@
 import json
+import logging
 from pathlib import Path
 
 from odoo import api, fields, models
+
+
+_logger = logging.getLogger(__name__)
 
 
 class EventMindEvent(models.Model):
@@ -66,6 +70,20 @@ class EventMindEvent(models.Model):
         ("eventmind_event_external_id_uniq", "unique(external_id)", "External ID must be unique."),
     ]
 
+    def init(self):
+        try:
+            result = self.import_timepad_json()
+        except Exception:
+            _logger.exception("EventMind failed to import Timepad events during module update")
+            return
+
+        _logger.info(
+            "EventMind Timepad module data import: read=%s imported=%s skipped=%s",
+            result.get("read", 0),
+            result.get("imported", 0),
+            result.get("skipped", 0),
+        )
+
     _MONTHS_GENITIVE_RU = {
         1: "\u044f\u043d\u0432\u0430\u0440\u044f",
         2: "\u0444\u0435\u0432\u0440\u0430\u043b\u044f",
@@ -118,15 +136,19 @@ class EventMindEvent(models.Model):
             events = json.load(f)
 
         imported_external_ids = set()
+        imported_count = 0
+        skipped_count = 0
 
         for item in events:
             date_start = self._normalize_datetime_value(item.get("date_start"))
             if not date_start:
+                skipped_count += 1
                 continue
 
             date_end = self._normalize_datetime_value(item.get("date_end")) or date_start
             external_id = item.get("url") or item.get("external_id") or ""
             if not external_id:
+                skipped_count += 1
                 continue
 
             imported_external_ids.add(external_id)
@@ -151,6 +173,7 @@ class EventMindEvent(models.Model):
                 record.write(vals)
             else:
                 self.create(vals)
+            imported_count += 1
 
         if cancel_stale:
             stale_domain = [("source", "=", "timepad"), ("status", "!=", "cancelled")]
@@ -158,7 +181,11 @@ class EventMindEvent(models.Model):
                 stale_domain.append(("external_id", "not in", list(imported_external_ids)))
             self.search(stale_domain).write({"status": "cancelled"})
 
-        return True
+        return {
+            "read": len(events),
+            "imported": imported_count,
+            "skipped": skipped_count,
+        }
 
 
 class EventMindPartner(models.Model):
