@@ -62,7 +62,7 @@
 
                                 <p>
                                     <strong>Дата:</strong>
-                                    <t t-esc="event.date_start"/>
+                                    <t t-esc="event.eventmind_display_datetime()"/>
                                 </p>
 
                                 <p>
@@ -160,7 +160,7 @@
                                     <span class="badge bg-success">AI</span>
                                 </div>
                                 <p class="text-muted mb-2">Score: <t t-esc="item.score"/></p>
-                                <p><strong>Date:</strong> <t t-esc="event.date_start"/></p>
+                                <p><strong>Date:</strong> <t t-esc="event.eventmind_display_datetime()"/></p>
                                 <p><strong>Place:</strong> <t t-esc="event.location or '-'"/></p>
                                 <p class="text-muted"><t t-esc="item.reason"/></p>
                                 <div class="d-flex flex-wrap gap-2 mt-auto">
@@ -434,7 +434,7 @@
                                         <span class="badge bg-success">AI</span>
                                     </div>
                                     <p class="text-muted mb-2">Score: <t t-esc="item.score"/></p>
-                                    <p><strong>Date:</strong> <t t-esc="event.date_start"/></p>
+                                    <p><strong>Date:</strong> <t t-esc="event.eventmind_display_datetime()"/></p>
                                     <p><strong>Place:</strong> <t t-esc="event.location or '-'"/></p>
                                     <p class="text-muted"><t t-esc="item.reason"/></p>
                                     <div class="d-flex flex-wrap gap-2 mt-auto">
@@ -457,7 +457,7 @@
                             <div class="col-md-4 mb-4">
                                 <div class="card h-100 shadow-sm p-3">
                                     <h4><t t-esc="event.name"/></h4>
-                                    <p><strong>Дата:</strong> <t t-esc="event.date_start"/></p>
+                                    <p><strong>Дата:</strong> <t t-esc="event.eventmind_display_datetime()"/></p>
                                     <p><strong>Место:</strong> <t t-esc="event.location or '-'"/></p>
                                     <div class="d-flex gap-2 mt-auto">
                                         <a t-if="event.source_url" t-att-href="event.source_url" target="_blank" class="btn btn-primary">Подробнее</a>

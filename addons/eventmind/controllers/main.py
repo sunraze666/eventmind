@@ -1,5 +1,6 @@
 import json
 import logging
+from datetime import datetime, timedelta
 from types import SimpleNamespace
 
 from odoo import fields, http
@@ -82,10 +83,30 @@ class EventMindController(http.Controller):
             return []
         return [SimpleNamespace(**item) for item in items]
 
+    @staticmethod
+    def _upcoming_events_domain():
+        return [
+            ("status", "!=", "cancelled"),
+            ("date_start", ">=", fields.Datetime.now()),
+        ]
+
+    def _sync_timepad_events(self):
+        try:
+            params = request.env["ir.config_parameter"].sudo()
+            last_sync = fields.Datetime.to_datetime(params.get_param("eventmind.timepad_json_synced_at"))
+            if last_sync and last_sync > datetime.utcnow() - timedelta(hours=1):
+                return
+
+            request.env["eventmind.event"].sudo().import_timepad_json()
+            params.set_param("eventmind.timepad_json_synced_at", fields.Datetime.now())
+        except Exception:
+            _logger.exception("EventMind Timepad JSON sync failed")
+
     @http.route("/eventmind/events", type="http", auth="public", website=True)
     def eventmind_events(self, **kwargs):
+        self._sync_timepad_events()
         events = request.env["eventmind.event"].sudo().search(
-            [("status", "!=", "cancelled")],
+            self._upcoming_events_domain(),
             order="date_start asc",
         )
 
@@ -104,9 +125,10 @@ class EventMindController(http.Controller):
 
     @http.route("/eventmind/recommendations", type="http", auth="user", website=True)
     def eventmind_recommendations(self, **kwargs):
+        self._sync_timepad_events()
         user = request.env.user.sudo()
         events = request.env["eventmind.event"].sudo().search(
-            [("status", "!=", "cancelled")],
+            self._upcoming_events_domain(),
             order="date_start asc",
         )
         recommendation_items = self._recommendations_for(user, events, top_k=12)
@@ -234,6 +256,7 @@ class EventMindController(http.Controller):
 
     @http.route("/eventmind/cabinet", type="http", auth="user", website=True, methods=["GET", "POST"])
     def eventmind_cabinet(self, **post):
+        self._sync_timepad_events()
         user = request.env.user.sudo()
         profile = user.partner_id.sudo()
         error = ""
@@ -329,7 +352,7 @@ class EventMindController(http.Controller):
 
         events = user.personal_event_ids.sorted(key=lambda e: e.date_start or fields.Datetime.now())
         recommendation_source = request.env["eventmind.event"].sudo().search(
-            [("status", "!=", "cancelled")],
+            self._upcoming_events_domain(),
             order="date_start asc",
         )
         recommendation_items = self._recommendations_for(user, recommendation_source)
@@ -371,7 +394,7 @@ class EventMindController(http.Controller):
     )
     def add_event_to_cabinet(self, event_id, redirect=None, **kwargs):
         event = request.env["eventmind.event"].sudo().search(
-            [("id", "=", event_id), ("status", "!=", "cancelled")],
+            [("id", "=", event_id)] + self._upcoming_events_domain(),
             limit=1,
         )
         if event:
