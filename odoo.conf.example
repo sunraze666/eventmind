@@ -1,0 +1,16 @@
+[options]
+; Copy this file to odoo.local.conf and fill in db_password locally.
+; If your Odoo installation requires its own core addons path, include it
+; before this project's addons path, separated by a comma.
+addons_path = C:\Users\User\Desktop\eventmind\addons
+
+db_host = db.klazepcuownzshhwyilj.supabase.co
+db_port = 5432
+db_name = postgres
+db_user = postgres
+db_password = CHANGE_ME
+db_sslmode = require
+
+; Optional local server settings.
+xmlrpc_port = 8069
+proxy_mode = False
