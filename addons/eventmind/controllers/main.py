@@ -90,6 +90,19 @@ class EventMindController(http.Controller):
             ("date_start", ">=", fields.Datetime.now()),
         ]
 
+    def _ensure_timepad_events_available(self):
+        events = request.env["eventmind.event"].sudo()
+        upcoming_timepad_count = events.search_count(
+            self._upcoming_events_domain() + [("source", "=", "timepad")]
+        )
+        if upcoming_timepad_count:
+            return
+
+        try:
+            events.import_timepad_json()
+        except Exception:
+            _logger.exception("EventMind Timepad JSON import failed")
+
     @http.route("/eventmind/admin/sync-timepad", type="http", auth="user", website=True)
     def sync_timepad_events(self, **kwargs):
         if not request.env.user.has_group("base.group_system"):
@@ -100,6 +113,7 @@ class EventMindController(http.Controller):
 
     @http.route("/eventmind/events", type="http", auth="public", website=True)
     def eventmind_events(self, **kwargs):
+        self._ensure_timepad_events_available()
         events = request.env["eventmind.event"].sudo().search(
             self._upcoming_events_domain(),
             order="date_start asc",
@@ -120,6 +134,7 @@ class EventMindController(http.Controller):
 
     @http.route("/eventmind/recommendations", type="http", auth="user", website=True)
     def eventmind_recommendations(self, **kwargs):
+        self._ensure_timepad_events_available()
         user = request.env.user.sudo()
         events = request.env["eventmind.event"].sudo().search(
             self._upcoming_events_domain(),
@@ -250,6 +265,7 @@ class EventMindController(http.Controller):
 
     @http.route("/eventmind/cabinet", type="http", auth="user", website=True, methods=["GET", "POST"])
     def eventmind_cabinet(self, **post):
+        self._ensure_timepad_events_available()
         user = request.env.user.sudo()
         profile = user.partner_id.sudo()
         error = ""
