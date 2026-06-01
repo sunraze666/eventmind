@@ -1,11 +1,11 @@
 import json
 import logging
-from datetime import datetime, timedelta
 from types import SimpleNamespace
 
 from odoo import fields, http
 from odoo.exceptions import AccessDenied
 from odoo.http import request
+from werkzeug.exceptions import Forbidden
 
 from ..services.recommendations import EventRecommendationEngine
 
@@ -90,21 +90,16 @@ class EventMindController(http.Controller):
             ("date_start", ">=", fields.Datetime.now()),
         ]
 
-    def _sync_timepad_events(self):
-        try:
-            params = request.env["ir.config_parameter"].sudo()
-            last_sync = fields.Datetime.to_datetime(params.get_param("eventmind.timepad_json_synced_at"))
-            if last_sync and last_sync > datetime.utcnow() - timedelta(hours=1):
-                return
+    @http.route("/eventmind/admin/sync-timepad", type="http", auth="user", website=True)
+    def sync_timepad_events(self, **kwargs):
+        if not request.env.user.has_group("base.group_system"):
+            raise Forbidden()
 
-            request.env["eventmind.event"].sudo().import_timepad_json()
-            params.set_param("eventmind.timepad_json_synced_at", fields.Datetime.now())
-        except Exception:
-            _logger.exception("EventMind Timepad JSON sync failed")
+        request.env["eventmind.event"].sudo().import_timepad_json()
+        return request.redirect("/eventmind/events")
 
     @http.route("/eventmind/events", type="http", auth="public", website=True)
     def eventmind_events(self, **kwargs):
-        self._sync_timepad_events()
         events = request.env["eventmind.event"].sudo().search(
             self._upcoming_events_domain(),
             order="date_start asc",
@@ -125,7 +120,6 @@ class EventMindController(http.Controller):
 
     @http.route("/eventmind/recommendations", type="http", auth="user", website=True)
     def eventmind_recommendations(self, **kwargs):
-        self._sync_timepad_events()
         user = request.env.user.sudo()
         events = request.env["eventmind.event"].sudo().search(
             self._upcoming_events_domain(),
@@ -256,7 +250,6 @@ class EventMindController(http.Controller):
 
     @http.route("/eventmind/cabinet", type="http", auth="user", website=True, methods=["GET", "POST"])
     def eventmind_cabinet(self, **post):
-        self._sync_timepad_events()
         user = request.env.user.sudo()
         profile = user.partner_id.sudo()
         error = ""
