@@ -9,7 +9,33 @@
                     <a href="/eventmind/login" class="em-nav-link em-nav-link-primary">Вход</a>
                 </t>
                 <t t-else="">
-                    <a href="/eventmind/recommendations" class="em-nav-link">Recommendations</a>
+                    <details class="em-notifications">
+                        <summary class="em-notifications-toggle" aria-label="Уведомления">
+                            <span class="em-notifications-icon" aria-hidden="true"></span>
+                            <span class="em-notifications-text">Уведомления</span>
+                            <span t-if="notification_items" class="em-notifications-count"><t t-esc="len(notification_items)"/></span>
+                        </summary>
+                        <div class="em-notifications-menu">
+                            <div class="em-notifications-title">Напоминания</div>
+                            <t t-if="notification_items">
+                                <t t-foreach="notification_items" t-as="notification" t-key="notification.event.id">
+                                    <a t-att-href="'/eventmind/cabinet'" class="em-notification-item">
+                                        <span class="em-notification-label"><t t-esc="notification.label"/></span>
+                                        <span class="em-notification-name"><t t-esc="notification.event.name"/></span>
+                                        <span class="em-notification-meta">
+                                            <t t-esc="notification.display_datetime"/>
+                                            <t t-if="notification.event.location"> · <t t-esc="notification.event.location"/></t>
+                                        </span>
+                                        <span class="em-notification-message"><t t-esc="notification.message"/></span>
+                                    </a>
+                                </t>
+                            </t>
+                            <t t-else="">
+                                <div class="em-notifications-empty">Нет ближайших напоминаний.</div>
+                            </t>
+                        </div>
+                    </details>
+                    <a href="/eventmind/recommendations" class="em-nav-link">Рекомендации</a>
                     <a href="/eventmind/cabinet" class="em-nav-link">Мой кабинет</a>
                     <a href="/web/session/logout?redirect=/eventmind/events" class="em-nav-link">Выйти</a>
                 </t>
@@ -128,10 +154,10 @@
                 <t t-call="eventmind.eventmind_site_header"/>
                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
                     <div>
-                        <h1 class="mb-1">Recommendations</h1>
-                        <p class="text-muted mb-0">Personal event suggestions based on your interests and calendar.</p>
+                        <h1 class="mb-1">Рекомендации</h1>
+                        <p class="text-muted mb-0">Персональные подборки событий на основе ваших интересов и календаря.</p>
                     </div>
-                    <a href="/eventmind/cabinet" class="btn btn-outline-primary">Edit profile</a>
+                    <a href="/eventmind/cabinet" class="btn btn-outline-primary">Редактировать профиль</a>
                 </div>
 
                 <div t-if="selected_interests" class="mb-4">
@@ -143,11 +169,11 @@
                 </div>
 
                 <div t-if="not has_profile_data" class="alert alert-info" role="alert">
-                    Add interests in your profile or save a few events to your calendar to get personal recommendations.
+                    Добавьте интересы в профиле или сохраните несколько событий в календарь, чтобы получить персональные рекомендации.
                 </div>
 
                 <div t-elif="not recommendation_items" class="alert alert-info" role="alert">
-                    No recommendations yet. Add more interests or upcoming events to your calendar.
+                    Рекомендаций пока нет. Добавьте больше интересов или предстоящих событий в календарь.
                 </div>
 
                 <div t-if="recommendation_items" class="row">
@@ -159,16 +185,16 @@
                                     <h4 class="mb-0"><t t-esc="event.name"/></h4>
                                     <span class="badge bg-success">AI</span>
                                 </div>
-                                <p class="text-muted mb-2">Score: <t t-esc="item.score"/></p>
-                                <p><strong>Date:</strong> <span t-field="event.date_start" t-options='{"widget": "datetime", "format": "d MMMM y, HH:mm"}'/></p>
-                                <p><strong>Place:</strong> <t t-esc="event.location or '-'"/></p>
+                                <p class="text-muted mb-2">Оценка: <t t-esc="item.score"/></p>
+                                <p><strong>Дата:</strong> <span t-field="event.date_start" t-options='{"widget": "datetime", "format": "d MMMM y, HH:mm"}'/></p>
+                                <p><strong>Место:</strong> <t t-esc="event.location or '-'"/></p>
                                 <p class="text-muted"><t t-esc="item.reason"/></p>
                                 <div class="d-flex flex-wrap gap-2 mt-auto">
-                                    <a t-if="event.source_url" t-att-href="event.source_url" target="_blank" class="btn btn-primary">Details</a>
+                                    <a t-if="event.source_url" t-att-href="event.source_url" target="_blank" class="btn btn-primary">Подробнее</a>
                                     <form t-att-action="'/eventmind/cabinet/calendar/add/%s' % event.id" method="post" class="d-inline">
                                         <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                                         <input type="hidden" name="redirect" value="/eventmind/recommendations"/>
-                                        <button type="submit" class="btn btn-outline-success">Add to calendar</button>
+                                        <button type="submit" class="btn btn-outline-success">Добавить в календарь</button>
                                     </form>
                                 </div>
                             </div>
@@ -423,7 +449,7 @@
                 </section>
 
                 <section t-if="recommendation_items" class="mb-4">
-                    <h3 class="mb-3">Recommended for you</h3>
+                    <h3 class="mb-3">Рекомендовано для вас</h3>
                     <div class="row">
                         <t t-foreach="recommendation_items" t-as="item" t-key="item.event.id">
                             <t t-set="event" t-value="item.event"/>
@@ -433,15 +459,15 @@
                                         <h4 class="mb-0"><t t-esc="event.name"/></h4>
                                         <span class="badge bg-success">AI</span>
                                     </div>
-                                    <p class="text-muted mb-2">Score: <t t-esc="item.score"/></p>
-                                    <p><strong>Date:</strong> <span t-field="event.date_start" t-options='{"widget": "datetime", "format": "d MMMM y, HH:mm"}'/></p>
-                                    <p><strong>Place:</strong> <t t-esc="event.location or '-'"/></p>
+                                    <p class="text-muted mb-2">Оценка: <t t-esc="item.score"/></p>
+                                    <p><strong>Дата:</strong> <span t-field="event.date_start" t-options='{"widget": "datetime", "format": "d MMMM y, HH:mm"}'/></p>
+                                    <p><strong>Место:</strong> <t t-esc="event.location or '-'"/></p>
                                     <p class="text-muted"><t t-esc="item.reason"/></p>
                                     <div class="d-flex flex-wrap gap-2 mt-auto">
-                                        <a t-if="event.source_url" t-att-href="event.source_url" target="_blank" class="btn btn-primary">Details</a>
+                                        <a t-if="event.source_url" t-att-href="event.source_url" target="_blank" class="btn btn-primary">Подробнее</a>
                                         <form t-att-action="'/eventmind/cabinet/calendar/add/%s' % event.id" method="post" class="d-inline">
                                             <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                                            <button type="submit" class="btn btn-outline-success">Add to calendar</button>
+                                            <button type="submit" class="btn btn-outline-success">Добавить в календарь</button>
                                         </form>
                                     </div>
                                 </div>

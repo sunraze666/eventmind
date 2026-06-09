@@ -1,5 +1,6 @@
 import json
 import logging
+from datetime import timedelta
 from types import SimpleNamespace
 
 from odoo import fields, http
@@ -84,6 +85,39 @@ class EventMindController(http.Controller):
         return [SimpleNamespace(**item) for item in items]
 
     @staticmethod
+    def _notification_items_for(user):
+        if user._is_public():
+            return []
+
+        now = fields.Datetime.to_datetime(fields.Datetime.now())
+        remind_until = now + timedelta(days=1)
+        items = []
+
+        for event in user.sudo().personal_event_ids:
+            start_dt = fields.Datetime.to_datetime(event.date_start)
+            if not start_dt or start_dt < now or start_dt > remind_until or event.status == "cancelled":
+                continue
+
+            hours_until = (start_dt - now).total_seconds() / 3600
+            if hours_until <= 3:
+                label = "Через несколько часов"
+                message = "Событие начнется совсем скоро."
+            else:
+                label = "За день до события"
+                message = "До мероприятия осталось меньше суток."
+
+            items.append(
+                SimpleNamespace(
+                    event=event,
+                    label=label,
+                    message=message,
+                    display_datetime=event.eventmind_display_datetime(),
+                )
+            )
+
+        return sorted(items, key=lambda item: item.event.date_start or fields.Datetime.now())
+
+    @staticmethod
     def _upcoming_events_domain():
         return [
             ("status", "!=", "cancelled"),
@@ -120,14 +154,18 @@ class EventMindController(http.Controller):
         )
 
         user_event_ids = []
+        notification_items = []
         if not request.env.user._is_public():
-            user_event_ids = request.env.user.sudo().personal_event_ids.ids
+            current_user = request.env.user.sudo()
+            user_event_ids = current_user.personal_event_ids.ids
+            notification_items = self._notification_items_for(current_user)
 
         return request.render(
             "eventmind.eventmind_events_page",
             {
                 "events": events,
                 "user_event_ids": user_event_ids,
+                "notification_items": notification_items,
                 "calendar_events_json": self._calendar_payload(events),
             },
         )
@@ -149,13 +187,20 @@ class EventMindController(http.Controller):
                 "recommendation_items": recommendation_items,
                 "selected_interests": selected_interests,
                 "has_profile_data": bool(selected_interests or user.personal_event_ids),
+                "notification_items": self._notification_items_for(user),
             },
         )
 
     @http.route("/eventmind/login", type="http", auth="public", website=True, methods=["GET", "POST"])
     def eventmind_login(self, **post):
         if request.httprequest.method == "GET":
-            return request.render("eventmind.eventmind_login_page", {"error": ""})
+            return request.render(
+                "eventmind.eventmind_login_page",
+                {
+                    "error": "",
+                    "notification_items": self._notification_items_for(request.env.user.sudo()),
+                },
+            )
 
         login = (post.get("login") or "").strip().lower()
         password = post.get("password") or ""
@@ -177,6 +222,7 @@ class EventMindController(http.Controller):
             {
                 "error": error,
                 "login": login,
+                "notification_items": self._notification_items_for(request.env.user.sudo()),
             },
         )
 
@@ -185,7 +231,12 @@ class EventMindController(http.Controller):
         if request.httprequest.method == "GET":
             return request.render(
                 "eventmind.eventmind_signup_page",
-                {"error": "", "values": {}, "interest_tags": self.INTEREST_TAGS},
+                {
+                    "error": "",
+                    "values": {},
+                    "interest_tags": self.INTEREST_TAGS,
+                    "notification_items": self._notification_items_for(request.env.user.sudo()),
+                },
             )
 
         full_name = (post.get("full_name") or "").strip()
@@ -231,6 +282,7 @@ class EventMindController(http.Controller):
                     "error": error,
                     "values": values,
                     "interest_tags": self.INTEREST_TAGS,
+                    "notification_items": self._notification_items_for(request.env.user.sudo()),
                 },
             )
 
@@ -388,6 +440,7 @@ class EventMindController(http.Controller):
                 "profile_form_values": profile_form_values,
                 "interest_tags": self.INTEREST_TAGS,
                 "gender_label": gender_labels.get(profile.em_gender, "-"),
+                "notification_items": self._notification_items_for(user),
                 "error": error,
                 "success": success,
             },
