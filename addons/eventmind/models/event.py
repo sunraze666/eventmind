@@ -263,6 +263,9 @@ class EventMindEvent(models.Model):
                 continue
 
             imported_external_ids.add(external_id)
+            price = item.get("price") or ""
+            if not price and "Бесплатно" in (item.get("description") or ""):
+                price = "Бесплатно"
 
             vals = {
                 "name": item.get("name") or "Untitled event",
@@ -270,7 +273,7 @@ class EventMindEvent(models.Model):
                     item.get("description") or "",
                     item.get("name") or "Untitled event",
                     item.get("location") or "",
-                    item.get("price") or "",
+                    price,
                     item.get("age_limit") or "",
                 ),
                 "date_start": date_start,
@@ -281,7 +284,7 @@ class EventMindEvent(models.Model):
                 "source": "timepad",
                 "source_url": item.get("url") or "",
                 "external_id": external_id,
-                "price": item.get("price") or "",
+                "price": price,
                 "age_limit": item.get("age_limit") or "",
             }
 

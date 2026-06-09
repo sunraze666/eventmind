@@ -139,9 +139,9 @@
                                         <t t-esc="event.location or '-'"/>
                                     </p>
 
-                                    <p t-if="event.price">
+                                    <p>
                                         <strong>Цена:</strong>
-                                        <t t-esc="event.price"/>
+                                        <t t-esc="event.price or 'Бесплатно'"/>
                                     </p>
 
                                     <p t-if="event.age_limit">
