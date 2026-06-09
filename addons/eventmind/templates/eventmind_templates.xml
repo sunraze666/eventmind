@@ -21,9 +21,10 @@
                                     <a t-att-href="'/eventmind/cabinet'" class="em-notification-item">
                                         <span class="em-notification-label"><t t-esc="notification.label"/></span>
                                         <span class="em-notification-name"><t t-esc="notification.event.name"/></span>
+                                        <t t-set="notification_location" t-value="notification.event.eventmind_display_location()"/>
                                         <span class="em-notification-meta">
                                             <t t-esc="notification.display_datetime"/>
-                                            <t t-if="notification.event.location"> · <t t-esc="notification.event.location"/></t>
+                                            <t t-if="notification_location != '-'"> · <t t-esc="notification_location"/></t>
                                         </span>
                                         <span class="em-notification-message"><t t-esc="notification.message"/></span>
                                     </a>
@@ -136,7 +137,7 @@
 
                                     <p>
                                         <strong>Место:</strong>
-                                        <t t-esc="event.location"/>
+                                        <t t-esc="event.eventmind_display_location()"/>
                                     </p>
 
                                     <p t-if="event.price">
@@ -149,9 +150,9 @@
                                         <t t-esc="event.age_limit"/>
                                     </p>
 
-                                    <p t-if="event.description">
-                                        <t t-esc="event.description[:180]"/>
-                                        <t t-if="len(event.description) > 180">...</t>
+                                    <t t-set="clean_description" t-value="event.eventmind_display_description()"/>
+                                    <p t-if="clean_description" class="em-event-description">
+                                        <t t-esc="clean_description"/>
                                     </p>
 
                                     <div class="d-flex flex-wrap gap-2 mt-auto">
@@ -236,7 +237,7 @@
                                 </div>
                                 <p class="text-muted mb-2">Оценка: <t t-esc="item.score"/></p>
                                 <p><strong>Дата:</strong> <span t-field="event.date_start" t-options='{"widget": "datetime", "format": "d MMMM y, HH:mm"}'/></p>
-                                <p><strong>Место:</strong> <t t-esc="event.location or '-'"/></p>
+                                <p><strong>Место:</strong> <t t-esc="event.eventmind_display_location()"/></p>
                                 <div class="d-flex flex-wrap gap-2 mt-auto">
                                     <a t-if="event.source_url" t-att-href="event.source_url" target="_blank" class="btn btn-primary">Подробнее</a>
                                     <form t-att-action="'/eventmind/cabinet/calendar/add/%s' % event.id" method="post" class="d-inline">
@@ -505,7 +506,7 @@
                                     </div>
                                     <p class="text-muted mb-2">Оценка: <t t-esc="item.score"/></p>
                                     <p><strong>Дата:</strong> <span t-field="event.date_start" t-options='{"widget": "datetime", "format": "d MMMM y, HH:mm"}'/></p>
-                                    <p><strong>Место:</strong> <t t-esc="event.location or '-'"/></p>
+                                    <p><strong>Место:</strong> <t t-esc="event.eventmind_display_location()"/></p>
                                     <div class="d-flex flex-wrap gap-2 mt-auto">
                                         <a t-if="event.source_url" t-att-href="event.source_url" target="_blank" class="btn btn-primary">Подробнее</a>
                                         <form t-att-action="'/eventmind/cabinet/calendar/add/%s' % event.id" method="post" class="d-inline">
@@ -527,7 +528,7 @@
                                 <div class="card h-100 shadow-sm p-3">
                                     <h4><t t-esc="event.name"/></h4>
                                     <p><strong>Дата:</strong> <span t-field="event.date_start" t-options='{"widget": "datetime", "format": "d MMMM y, HH:mm"}'/></p>
-                                    <p><strong>Место:</strong> <t t-esc="event.location or '-'"/></p>
+                                    <p><strong>Место:</strong> <t t-esc="event.eventmind_display_location()"/></p>
                                     <div class="d-flex gap-2 mt-auto">
                                         <a t-if="event.source_url" t-att-href="event.source_url" target="_blank" class="btn btn-primary">Подробнее</a>
                                         <form t-att-action="'/eventmind/cabinet/calendar/remove/%s' % event.id" method="post" class="d-inline">

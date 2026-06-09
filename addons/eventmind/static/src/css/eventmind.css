@@ -285,6 +285,12 @@ a.em-event-chip:hover {
     color: #fff;
 }
 
+.em-event-description {
+    color: #4d586f;
+    font-size: 0.92rem;
+    line-height: 1.45;
+}
+
 .em-week-grid {
     display: grid;
     grid-template-columns: repeat(7, minmax(0, 1fr));
