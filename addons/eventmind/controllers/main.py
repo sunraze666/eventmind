@@ -16,24 +16,24 @@ _logger = logging.getLogger(__name__)
 
 class EventMindController(http.Controller):
     CATEGORY_FILTERS = [
-        ("conference", "Конференции"),
-        ("meetup", "Встречи"),
-        ("startup", "Стартапы"),
-        ("education", "Образование"),
-        ("other", "Другое"),
+        SimpleNamespace(value="conference", label="Конференции"),
+        SimpleNamespace(value="meetup", label="Встречи"),
+        SimpleNamespace(value="startup", label="Стартапы"),
+        SimpleNamespace(value="education", label="Образование"),
+        SimpleNamespace(value="other", label="Другое"),
     ]
     DATE_FILTERS = [
-        ("today", "Сегодня"),
-        ("week", "Ближайшая неделя"),
-        ("month", "Ближайший месяц"),
+        SimpleNamespace(value="today", label="Сегодня"),
+        SimpleNamespace(value="week", label="Ближайшая неделя"),
+        SimpleNamespace(value="month", label="Ближайший месяц"),
     ]
     PRICE_FILTERS = [
-        ("free", "Бесплатные"),
-        ("paid", "Платные"),
+        SimpleNamespace(value="free", label="Бесплатные"),
+        SimpleNamespace(value="paid", label="Платные"),
     ]
     SORT_OPTIONS = [
-        ("date", "Сначала ближайшие"),
-        ("name", "По названию"),
+        SimpleNamespace(value="date", label="Сначала ближайшие"),
+        SimpleNamespace(value="name", label="По названию"),
     ]
     INTEREST_TAGS = [
         "Программирование",

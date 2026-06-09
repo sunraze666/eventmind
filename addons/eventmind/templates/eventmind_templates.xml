@@ -84,8 +84,8 @@
                             <label class="form-label" for="em_filter_category">Категория</label>
                             <select id="em_filter_category" name="category" class="form-select">
                                 <option value="">Все категории</option>
-                                <t t-foreach="category_filters" t-as="option" t-key="option[0]">
-                                    <option t-att-value="option[0]" t-att-selected="'selected' if filter_values.get('category') == option[0] else None"><t t-esc="option[1]"/></option>
+                                <t t-foreach="category_filters" t-as="option" t-key="option.value">
+                                    <option t-att-value="option.value" t-att-selected="'selected' if filter_values.get('category') == option.value else None"><t t-esc="option.label"/></option>
                                 </t>
                             </select>
                         </div>
@@ -93,8 +93,8 @@
                             <label class="form-label" for="em_filter_date">Дата</label>
                             <select id="em_filter_date" name="date_range" class="form-select">
                                 <option value="">Все даты</option>
-                                <t t-foreach="date_filters" t-as="option" t-key="option[0]">
-                                    <option t-att-value="option[0]" t-att-selected="'selected' if filter_values.get('date_range') == option[0] else None"><t t-esc="option[1]"/></option>
+                                <t t-foreach="date_filters" t-as="option" t-key="option.value">
+                                    <option t-att-value="option.value" t-att-selected="'selected' if filter_values.get('date_range') == option.value else None"><t t-esc="option.label"/></option>
                                 </t>
                             </select>
                         </div>
@@ -102,16 +102,16 @@
                             <label class="form-label" for="em_filter_price">Цена</label>
                             <select id="em_filter_price" name="price" class="form-select">
                                 <option value="">Любая цена</option>
-                                <t t-foreach="price_filters" t-as="option" t-key="option[0]">
-                                    <option t-att-value="option[0]" t-att-selected="'selected' if filter_values.get('price') == option[0] else None"><t t-esc="option[1]"/></option>
+                                <t t-foreach="price_filters" t-as="option" t-key="option.value">
+                                    <option t-att-value="option.value" t-att-selected="'selected' if filter_values.get('price') == option.value else None"><t t-esc="option.label"/></option>
                                 </t>
                             </select>
                         </div>
                         <div class="em-filter-field">
                             <label class="form-label" for="em_filter_sort">Сортировка</label>
                             <select id="em_filter_sort" name="sort" class="form-select">
-                                <t t-foreach="sort_options" t-as="option" t-key="option[0]">
-                                    <option t-att-value="option[0]" t-att-selected="'selected' if filter_values.get('sort') == option[0] else None"><t t-esc="option[1]"/></option>
+                                <t t-foreach="sort_options" t-as="option" t-key="option.value">
+                                    <option t-att-value="option.value" t-att-selected="'selected' if filter_values.get('sort') == option.value else None"><t t-esc="option.label"/></option>
                                 </t>
                             </select>
                         </div>
