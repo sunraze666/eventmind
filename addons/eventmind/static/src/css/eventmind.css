@@ -239,14 +239,14 @@ a.em-event-chip:hover {
 .em-event-card {
     border: 1px solid #e8edf8;
     border-radius: 10px;
-    padding: 8px;
+    padding: 9px;
     background: #f8fafe;
 }
 
 .em-event-card-head {
     display: flex;
-    align-items: baseline;
-    gap: 6px;
+    flex-direction: column;
+    gap: 4px;
 }
 
 .em-event-time {
@@ -260,6 +260,7 @@ a.em-event-chip:hover {
     font-size: 0.78rem;
     font-weight: 600;
     color: #26304a;
+    line-height: 1.25;
 }
 
 .em-event-meta {
@@ -287,31 +288,38 @@ a.em-event-chip:hover {
 .em-week-grid {
     display: grid;
     grid-template-columns: repeat(7, minmax(0, 1fr));
-    gap: 10px;
+    gap: 8px;
+    align-items: stretch;
 }
 
 .em-week-day {
     border: 1px solid #edf0f6;
     border-radius: 10px;
     background: #fff;
-    min-height: 220px;
+    min-height: 260px;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
 .em-week-day-head {
-    padding: 8px;
+    min-height: 44px;
+    padding: 8px 10px;
     border-bottom: 1px solid #edf0f6;
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     font-weight: 600;
     color: #303b57;
+    background: #f8fafe;
+    display: flex;
+    align-items: center;
 }
 
 .em-week-day-body {
+    flex: 1;
     padding: 8px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
 }
 
 .em-day-list {
@@ -418,9 +426,9 @@ a.em-event-chip:hover {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    min-height: 36px;
-    padding: 6px 12px;
+    width: 34px;
+    height: 34px;
+    padding: 0;
     border-radius: 8px;
     border: 1px solid #d7ddea;
     background: #fff;
@@ -440,8 +448,8 @@ a.em-event-chip:hover {
 
 .em-notifications-icon {
     position: relative;
-    width: 14px;
-    height: 15px;
+    width: 13px;
+    height: 14px;
     border: 2px solid currentColor;
     border-bottom: 0;
     border-radius: 8px 8px 3px 3px;
@@ -472,11 +480,14 @@ a.em-event-chip:hover {
 }
 
 .em-notifications-count {
+    position: absolute;
+    top: -7px;
+    right: -7px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 18px;
-    height: 18px;
+    min-width: 17px;
+    height: 17px;
     padding: 0 5px;
     border-radius: 999px;
     background: #d14a4a;
@@ -547,6 +558,33 @@ a.em-event-chip:hover {
     padding: 10px;
     color: #637083;
     font-size: 0.88rem;
+}
+
+.em-event-filters {
+    border: 1px solid #e3e7f0;
+    border-radius: 12px;
+    background: #fff;
+    padding: 14px;
+}
+
+.em-event-filters-form {
+    display: grid;
+    grid-template-columns: minmax(220px, 1.4fr) repeat(4, minmax(150px, 1fr)) auto;
+    gap: 12px;
+    align-items: end;
+}
+
+.em-filter-field .form-label {
+    margin-bottom: 5px;
+    color: #3b465f;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.em-filter-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
 .em-interest-tags {
@@ -626,7 +664,16 @@ a.em-event-chip:hover {
     }
 
     .em-week-grid {
+        grid-template-columns: repeat(2, minmax(240px, 1fr));
+    }
+
+    .em-event-filters-form {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .em-filter-field-wide,
+    .em-filter-actions {
+        grid-column: 1 / -1;
     }
 }
 
@@ -649,11 +696,12 @@ a.em-event-chip:hover {
     }
 
     .em-notifications {
-        width: 100%;
+        width: auto;
+        align-self: center;
     }
 
     .em-notifications-toggle {
-        width: 100%;
+        width: 34px;
     }
 
     .em-notifications-menu {
@@ -682,6 +730,19 @@ a.em-event-chip:hover {
 
     .em-week-grid {
         grid-template-columns: 1fr;
+    }
+
+    .em-event-filters-form {
+        grid-template-columns: 1fr;
+    }
+
+    .em-filter-field-wide,
+    .em-filter-actions {
+        grid-column: auto;
+    }
+
+    .em-filter-actions .btn {
+        flex: 1 1 120px;
     }
 }
 

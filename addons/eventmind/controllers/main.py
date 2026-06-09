@@ -15,6 +15,26 @@ _logger = logging.getLogger(__name__)
 
 
 class EventMindController(http.Controller):
+    CATEGORY_FILTERS = [
+        ("conference", "Конференции"),
+        ("meetup", "Встречи"),
+        ("startup", "Стартапы"),
+        ("education", "Образование"),
+        ("other", "Другое"),
+    ]
+    DATE_FILTERS = [
+        ("today", "Сегодня"),
+        ("week", "Ближайшая неделя"),
+        ("month", "Ближайший месяц"),
+    ]
+    PRICE_FILTERS = [
+        ("free", "Бесплатные"),
+        ("paid", "Платные"),
+    ]
+    SORT_OPTIONS = [
+        ("date", "Сначала ближайшие"),
+        ("name", "По названию"),
+    ]
     INTEREST_TAGS = [
         "Программирование",
         "Стартапы",
@@ -124,6 +144,67 @@ class EventMindController(http.Controller):
             ("date_start", ">=", fields.Datetime.now()),
         ]
 
+    def _filtered_events_domain(self, values):
+        domain = self._upcoming_events_domain()
+        category = values.get("category")
+        date_range = values.get("date_range")
+        price = values.get("price")
+        query = values.get("q")
+
+        if category:
+            domain.append(("category", "=", category))
+
+        now = fields.Datetime.to_datetime(fields.Datetime.now())
+        if date_range == "today":
+            tomorrow = now + timedelta(days=1)
+            domain.append(("date_start", "<", fields.Datetime.to_string(tomorrow)))
+        elif date_range == "week":
+            domain.append(("date_start", "<", fields.Datetime.to_string(now + timedelta(days=7))))
+        elif date_range == "month":
+            domain.append(("date_start", "<", fields.Datetime.to_string(now + timedelta(days=30))))
+
+        if price == "free":
+            domain += ["|", ("price", "=", False), ("price", "ilike", "бесплат")]
+        elif price == "paid":
+            domain += [("price", "!=", False), ("price", "not ilike", "бесплат")]
+
+        if query:
+            domain += [
+                "|",
+                "|",
+                ("name", "ilike", query),
+                ("location", "ilike", query),
+                ("description", "ilike", query),
+            ]
+
+        return domain
+
+    @staticmethod
+    def _event_filter_values(kwargs):
+        valid_categories = {"conference", "meetup", "startup", "education", "other"}
+        valid_dates = {"today", "week", "month"}
+        valid_prices = {"free", "paid"}
+        valid_sorts = {"date", "name"}
+
+        category = (kwargs.get("category") or "").strip()
+        date_range = (kwargs.get("date_range") or "").strip()
+        price = (kwargs.get("price") or "").strip()
+        sort = (kwargs.get("sort") or "date").strip()
+
+        return {
+            "category": category if category in valid_categories else "",
+            "date_range": date_range if date_range in valid_dates else "",
+            "price": price if price in valid_prices else "",
+            "sort": sort if sort in valid_sorts else "date",
+            "q": (kwargs.get("q") or "").strip(),
+        }
+
+    @staticmethod
+    def _event_order(sort):
+        if sort == "name":
+            return "name asc, date_start asc"
+        return "date_start asc"
+
     def _ensure_timepad_events_available(self):
         events = request.env["eventmind.event"].sudo()
         upcoming_timepad_count = events.search_count(
@@ -148,9 +229,10 @@ class EventMindController(http.Controller):
     @http.route("/eventmind/events", type="http", auth="public", website=True)
     def eventmind_events(self, **kwargs):
         self._ensure_timepad_events_available()
+        filter_values = self._event_filter_values(kwargs)
         events = request.env["eventmind.event"].sudo().search(
-            self._upcoming_events_domain(),
-            order="date_start asc",
+            self._filtered_events_domain(filter_values),
+            order=self._event_order(filter_values["sort"]),
         )
 
         user_event_ids = []
@@ -166,6 +248,11 @@ class EventMindController(http.Controller):
                 "events": events,
                 "user_event_ids": user_event_ids,
                 "notification_items": notification_items,
+                "filter_values": filter_values,
+                "category_filters": self.CATEGORY_FILTERS,
+                "date_filters": self.DATE_FILTERS,
+                "price_filters": self.PRICE_FILTERS,
+                "sort_options": self.SORT_OPTIONS,
                 "calendar_events_json": self._calendar_payload(events),
             },
         )

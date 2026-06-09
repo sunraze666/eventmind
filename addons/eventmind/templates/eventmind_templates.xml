@@ -12,7 +12,6 @@
                     <details class="em-notifications">
                         <summary class="em-notifications-toggle" aria-label="Уведомления">
                             <span class="em-notifications-icon" aria-hidden="true"></span>
-                            <span class="em-notifications-text">Уведомления</span>
                             <span t-if="notification_items" class="em-notifications-count"><t t-esc="len(notification_items)"/></span>
                         </summary>
                         <div class="em-notifications-menu">
@@ -67,79 +66,129 @@
                             <button type="button" class="btn btn-sm btn-outline-secondary" data-em-view="week">Неделя</button>
                             <button type="button" class="btn btn-sm btn-outline-secondary" data-em-view="day">День</button>
                         </div>
-                        <div class="em-density-switch" role="tablist" aria-label="Плотность событий">
-                            <button type="button" class="btn btn-sm btn-primary" data-em-density="tone">Оттенок</button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary" data-em-density="count">Число</button>
-                        </div>
                         <div class="em-calendar-current" data-em-current-label=""></div>
                     </div>
 
                     <div class="em-calendar-body" data-em-calendar-body=""></div>
 
                     <script id="em-calendar-events" type="application/json"><t t-raw="calendar_events_json"/></script>
-                    <p class="em-calendar-note mb-0">Режим «Оттенок» подсвечивает загруженность дня, режим «Число» показывает количество событий.</p>
+                </section>
+
+                <section class="em-event-filters mb-4">
+                    <form action="/eventmind/events" method="get" class="em-event-filters-form">
+                        <div class="em-filter-field em-filter-field-wide">
+                            <label class="form-label" for="em_filter_q">Поиск</label>
+                            <input id="em_filter_q" type="search" name="q" class="form-control" placeholder="Название, место или описание" t-att-value="filter_values.get('q', '')"/>
+                        </div>
+                        <div class="em-filter-field">
+                            <label class="form-label" for="em_filter_category">Категория</label>
+                            <select id="em_filter_category" name="category" class="form-select">
+                                <option value="">Все категории</option>
+                                <t t-foreach="category_filters" t-as="option" t-key="option[0]">
+                                    <option t-att-value="option[0]" t-att-selected="'selected' if filter_values.get('category') == option[0] else None"><t t-esc="option[1]"/></option>
+                                </t>
+                            </select>
+                        </div>
+                        <div class="em-filter-field">
+                            <label class="form-label" for="em_filter_date">Дата</label>
+                            <select id="em_filter_date" name="date_range" class="form-select">
+                                <option value="">Все даты</option>
+                                <t t-foreach="date_filters" t-as="option" t-key="option[0]">
+                                    <option t-att-value="option[0]" t-att-selected="'selected' if filter_values.get('date_range') == option[0] else None"><t t-esc="option[1]"/></option>
+                                </t>
+                            </select>
+                        </div>
+                        <div class="em-filter-field">
+                            <label class="form-label" for="em_filter_price">Цена</label>
+                            <select id="em_filter_price" name="price" class="form-select">
+                                <option value="">Любая цена</option>
+                                <t t-foreach="price_filters" t-as="option" t-key="option[0]">
+                                    <option t-att-value="option[0]" t-att-selected="'selected' if filter_values.get('price') == option[0] else None"><t t-esc="option[1]"/></option>
+                                </t>
+                            </select>
+                        </div>
+                        <div class="em-filter-field">
+                            <label class="form-label" for="em_filter_sort">Сортировка</label>
+                            <select id="em_filter_sort" name="sort" class="form-select">
+                                <t t-foreach="sort_options" t-as="option" t-key="option[0]">
+                                    <option t-att-value="option[0]" t-att-selected="'selected' if filter_values.get('sort') == option[0] else None"><t t-esc="option[1]"/></option>
+                                </t>
+                            </select>
+                        </div>
+                        <div class="em-filter-actions">
+                            <button type="submit" class="btn btn-primary">Применить</button>
+                            <a href="/eventmind/events" class="btn btn-outline-secondary">Сбросить</a>
+                        </div>
+                    </form>
                 </section>
 
                 <div class="row">
-                    <t t-foreach="events" t-as="event" t-key="event.id">
-                        <div class="col-md-4 mb-4">
-                            <div class="card h-100 shadow-sm p-3">
-                                <h4><t t-esc="event.name"/></h4>
+                    <t t-if="events">
+                        <t t-foreach="events" t-as="event" t-key="event.id">
+                            <div class="col-md-4 mb-4">
+                                <div class="card h-100 shadow-sm p-3">
+                                    <h4><t t-esc="event.name"/></h4>
 
-                                <p>
-                                    <strong>Дата:</strong>
-                                    <span t-field="event.date_start" t-options='{"widget": "datetime", "format": "d MMMM y, HH:mm"}'/>
-                                </p>
+                                    <p>
+                                        <strong>Дата:</strong>
+                                        <span t-field="event.date_start" t-options='{"widget": "datetime", "format": "d MMMM y, HH:mm"}'/>
+                                    </p>
 
-                                <p>
-                                    <strong>Место:</strong>
-                                    <t t-esc="event.location"/>
-                                </p>
+                                    <p>
+                                        <strong>Место:</strong>
+                                        <t t-esc="event.location"/>
+                                    </p>
 
-                                <p t-if="event.price">
-                                    <strong>Цена:</strong>
-                                    <t t-esc="event.price"/>
-                                </p>
+                                    <p t-if="event.price">
+                                        <strong>Цена:</strong>
+                                        <t t-esc="event.price"/>
+                                    </p>
 
-                                <p t-if="event.age_limit">
-                                    <strong>Возраст:</strong>
-                                    <t t-esc="event.age_limit"/>
-                                </p>
+                                    <p t-if="event.age_limit">
+                                        <strong>Возраст:</strong>
+                                        <t t-esc="event.age_limit"/>
+                                    </p>
 
-                                <p t-if="event.description">
-                                    <t t-esc="event.description[:180]"/>
-                                    <t t-if="len(event.description) > 180">...</t>
-                                </p>
+                                    <p t-if="event.description">
+                                        <t t-esc="event.description[:180]"/>
+                                        <t t-if="len(event.description) > 180">...</t>
+                                    </p>
 
-                                <div class="d-flex flex-wrap gap-2 mt-auto">
-                                    <a t-if="event.source_url"
-                                       t-att-href="event.source_url"
-                                       target="_blank"
-                                       class="btn btn-primary">
-                                        Подробнее
-                                    </a>
+                                    <div class="d-flex flex-wrap gap-2 mt-auto">
+                                        <a t-if="event.source_url"
+                                           t-att-href="event.source_url"
+                                           target="_blank"
+                                           class="btn btn-primary">
+                                            Подробнее
+                                        </a>
 
-                                    <t t-if="request.env.user._is_public()">
-                                        <a href="/eventmind/login" class="btn btn-outline-primary">Войдите, чтобы добавить</a>
-                                    </t>
-                                    <t t-else="">
-                                        <t t-if="event.id in user_event_ids">
-                                            <form t-att-action="'/eventmind/cabinet/calendar/remove/%s' % event.id" method="post" class="d-inline">
-                                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                                                <input type="hidden" name="redirect" value="/eventmind/events"/>
-                                                <button type="submit" class="btn btn-outline-danger">Удалить из моего календаря</button>
-                                            </form>
+                                        <t t-if="request.env.user._is_public()">
+                                            <a href="/eventmind/login" class="btn btn-outline-primary">Войдите, чтобы добавить</a>
                                         </t>
                                         <t t-else="">
-                                            <form t-att-action="'/eventmind/cabinet/calendar/add/%s' % event.id" method="post" class="d-inline">
-                                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                                                <input type="hidden" name="redirect" value="/eventmind/events"/>
-                                                <button type="submit" class="btn btn-outline-success">Добавить в мой календарь</button>
-                                            </form>
+                                            <t t-if="event.id in user_event_ids">
+                                                <form t-att-action="'/eventmind/cabinet/calendar/remove/%s' % event.id" method="post" class="d-inline">
+                                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                                    <input type="hidden" name="redirect" value="/eventmind/events"/>
+                                                    <button type="submit" class="btn btn-outline-danger">Удалить из моего календаря</button>
+                                                </form>
+                                            </t>
+                                            <t t-else="">
+                                                <form t-att-action="'/eventmind/cabinet/calendar/add/%s' % event.id" method="post" class="d-inline">
+                                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                                    <input type="hidden" name="redirect" value="/eventmind/events"/>
+                                                    <button type="submit" class="btn btn-outline-success">Добавить в мой календарь</button>
+                                                </form>
+                                            </t>
                                         </t>
-                                    </t>
+                                    </div>
                                 </div>
                             </div>
+                        </t>
+                    </t>
+                    <t t-else="">
+                        <div class="col-12">
+                            <div class="alert alert-info">По выбранным фильтрам событий не найдено.</div>
                         </div>
                     </t>
                 </div>
@@ -188,7 +237,6 @@
                                 <p class="text-muted mb-2">Оценка: <t t-esc="item.score"/></p>
                                 <p><strong>Дата:</strong> <span t-field="event.date_start" t-options='{"widget": "datetime", "format": "d MMMM y, HH:mm"}'/></p>
                                 <p><strong>Место:</strong> <t t-esc="event.location or '-'"/></p>
-                                <p class="text-muted"><t t-esc="item.reason"/></p>
                                 <div class="d-flex flex-wrap gap-2 mt-auto">
                                     <a t-if="event.source_url" t-att-href="event.source_url" target="_blank" class="btn btn-primary">Подробнее</a>
                                     <form t-att-action="'/eventmind/cabinet/calendar/add/%s' % event.id" method="post" class="d-inline">
@@ -436,10 +484,6 @@
                             <button type="button" class="btn btn-sm btn-outline-secondary" data-em-view="week">Неделя</button>
                             <button type="button" class="btn btn-sm btn-outline-secondary" data-em-view="day">День</button>
                         </div>
-                        <div class="em-density-switch" role="tablist" aria-label="Плотность событий">
-                            <button type="button" class="btn btn-sm btn-primary" data-em-density="tone">Оттенок</button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary" data-em-density="count">Число</button>
-                        </div>
                         <div class="em-calendar-current" data-em-current-label=""></div>
                     </div>
 
@@ -462,7 +506,6 @@
                                     <p class="text-muted mb-2">Оценка: <t t-esc="item.score"/></p>
                                     <p><strong>Дата:</strong> <span t-field="event.date_start" t-options='{"widget": "datetime", "format": "d MMMM y, HH:mm"}'/></p>
                                     <p><strong>Место:</strong> <t t-esc="event.location or '-'"/></p>
-                                    <p class="text-muted"><t t-esc="item.reason"/></p>
                                     <div class="d-flex flex-wrap gap-2 mt-auto">
                                         <a t-if="event.source_url" t-att-href="event.source_url" target="_blank" class="btn btn-primary">Подробнее</a>
                                         <form t-att-action="'/eventmind/cabinet/calendar/add/%s' % event.id" method="post" class="d-inline">

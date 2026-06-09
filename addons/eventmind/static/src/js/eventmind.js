@@ -5,9 +5,7 @@ const VIEW_MONTH = "month";
 const VIEW_WEEK = "week";
 const VIEW_DAY = "day";
 const DENSITY_TONE = "tone";
-const DENSITY_COUNT = "count";
 const VIEWS = [VIEW_YEAR, VIEW_MONTH, VIEW_WEEK, VIEW_DAY];
-const DENSITIES = [DENSITY_TONE, DENSITY_COUNT];
 const WEEKDAYS_RU = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
 const MONTHS_RU = [
     "Январь",
@@ -211,7 +209,6 @@ function renderMonthGrid(year, monthIndex, eventsMap, options = {}) {
     const offset = (firstDay.getDay() + 6) % 7;
     const totalDays = daysInMonth(year, monthIndex);
     const showTone = options.densityMode === DENSITY_TONE;
-    const showCount = options.densityMode === DENSITY_COUNT;
     const cells = [];
 
     for (let i = 0; i < offset; i++) {
@@ -234,13 +231,10 @@ function renderMonthGrid(year, monthIndex, eventsMap, options = {}) {
         }
 
         let eventsHtml = "";
-        if (options.compact) {
-            eventsHtml = showCount && events.length ? `<span class="em-day-badge">${events.length}</span>` : "";
-        } else if (events.length) {
+        if (!options.compact && events.length) {
             const chips = events.slice(0, 2).map(createEventChip).join("");
             const more = events.length > 2 ? `<span class="em-day-more">+${events.length - 2}</span>` : "";
-            const badge = showCount ? `<span class="em-day-count-inline">${events.length}</span>` : "";
-            eventsHtml = `<div class="em-day-events">${chips}${more}${badge}</div>`;
+            eventsHtml = `<div class="em-day-events">${chips}${more}</div>`;
         }
 
         cells.push(
@@ -363,11 +357,6 @@ function renderCalendar(root, state, eventsMap, stats) {
         button.classList.toggle("btn-primary", isActive);
         button.classList.toggle("btn-outline-secondary", !isActive);
     });
-    root.querySelectorAll("[data-em-density]").forEach((button) => {
-        const isActive = button.dataset.emDensity === state.densityMode;
-        button.classList.toggle("btn-primary", isActive);
-        button.classList.toggle("btn-outline-secondary", !isActive);
-    });
 
     body.querySelectorAll("[data-em-date]").forEach((dayCell) => {
         dayCell.addEventListener("click", () => {
@@ -423,17 +412,6 @@ function bootEventMindCalendar() {
             renderCalendar(root, state, eventsMap, stats);
         });
     });
-    root.querySelectorAll("[data-em-density]").forEach((button) => {
-        button.addEventListener("click", () => {
-            const requestedDensity = button.dataset.emDensity;
-            if (!DENSITIES.includes(requestedDensity)) {
-                return;
-            }
-            state.densityMode = requestedDensity;
-            renderCalendar(root, state, eventsMap, stats);
-        });
-    });
-
     root.querySelectorAll("[data-em-nav]").forEach((button) => {
         button.addEventListener("click", () => {
             const action = button.dataset.emNav;
