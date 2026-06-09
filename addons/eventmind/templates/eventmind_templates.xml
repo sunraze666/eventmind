@@ -149,9 +149,12 @@
                                         <t t-esc="event.age_limit"/>
                                     </p>
 
-                                    <p t-if="event.description" class="em-event-description">
-                                        <t t-esc="event.description[:220]"/>
-                                        <t t-if="len(event.description) > 220">...</t>
+                                    <p class="em-event-description">
+                                        <t t-if="event.description">
+                                            <t t-esc="event.description[:220]"/>
+                                            <t t-if="len(event.description) > 220">...</t>
+                                        </t>
+                                        <t t-else="">Описание пока недоступно.</t>
                                     </p>
 
                                     <div class="d-flex flex-wrap gap-2 mt-auto">
