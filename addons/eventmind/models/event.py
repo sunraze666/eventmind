@@ -266,10 +266,16 @@ class EventMindEvent(models.Model):
 
             vals = {
                 "name": item.get("name") or "Untitled event",
-                "description": item.get("description") or "",
+                "description": self._prepare_timepad_description(
+                    item.get("description") or "",
+                    item.get("name") or "Untitled event",
+                    item.get("location") or "",
+                    item.get("price") or "",
+                    item.get("age_limit") or "",
+                ),
                 "date_start": date_start,
                 "date_end": date_end,
-                "location": item.get("location") or "",
+                "location": self._prepare_timepad_location(item.get("location") or ""),
                 "category": "other",
                 "status": "planned",
                 "source": "timepad",
@@ -297,6 +303,87 @@ class EventMindEvent(models.Model):
             "imported": imported_count,
             "skipped": skipped_count,
         }
+
+    @api.model
+    def _prepare_timepad_location(self, value):
+        lines = self._clean_text_lines(value)
+        lines = [line for line in lines if line.lower() != "карта и схема проезда"]
+        return ", ".join(lines)
+
+    @api.model
+    def _prepare_timepad_description(self, value, name, location, price, age_limit):
+        lines = self._clean_text_lines(value)
+        if not lines:
+            return ""
+
+        stop_markers = {
+            "Выберите дату и время",
+            "По часовому поясу Екатеринбурга",
+            "Ещё события",
+            "Афиша событий",
+            "Рекомендуемое",
+            "Подписки",
+            "Организаторам",
+            "Создать событие",
+            "Возможности",
+            "Реклама",
+            "Timepad",
+            "О нас",
+            "Блог",
+            "Вакансии",
+            "Контакты",
+            "Документы",
+            "Помощь",
+            "Задать вопрос",
+            "База знаний",
+            "Разработчикам",
+        }
+
+        content = []
+        for line in lines:
+            if line in stop_markers or line.startswith("Cкачайте Timepad") or line.startswith("Аккредитованная ИТ-компания"):
+                break
+            content.append(line)
+
+        organizer_index = self._line_index(content, "Организатор:")
+        if organizer_index is not None:
+            start = organizer_index + 1
+            if start < len(content):
+                start += 1
+            content = content[start:]
+        else:
+            title_index = self._line_index(content, name)
+            if title_index is not None:
+                content = content[title_index + 1:]
+
+        skip_values = {
+            name or "",
+            price or "",
+            age_limit or "",
+            "Карта и схема проезда",
+            "Купить 1 билет",
+            "Получить 1 билет",
+            "Выбрать сеанс",
+            "Бесплатно",
+            "Адрес не указан",
+            "Екатеринбург",
+        }
+        location_lines = set(self._clean_text_lines(location))
+        cleaned = []
+        for line in content:
+            if line in skip_values or line in location_lines:
+                continue
+            if re.fullmatch(r"\d{1,2}\+", line) or re.fullmatch(r"[А-ЯA-ZЁ]", line):
+                continue
+            if re.fullmatch(r"[А-ЯЁ]{3}", line) or re.fullmatch(r"\d{1,2}", line):
+                continue
+            if line.startswith("Через ") or line.startswith("Идёт ") or line == "Повторяется":
+                continue
+            if re.search(r"\d{1,2}:\d{2}", line):
+                continue
+            cleaned.append(line)
+
+        return " ".join(cleaned).strip()
 
 
 class EventMindPartner(models.Model):

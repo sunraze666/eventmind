@@ -62,7 +62,7 @@ class EventMindController(http.Controller):
             "title": event.name or "",
             "start": start_dt.isoformat(),
             "end": (end_dt or start_dt).isoformat(),
-            "location": event.eventmind_display_location(),
+            "location": event.location or "",
             "url": event.source_url or "",
         }
 
