@@ -135,6 +135,32 @@ class EventMindController(http.Controller):
                 )
             )
 
+        if not items:
+            upcoming_events = user.sudo().personal_event_ids.filtered(
+                lambda event: event.status != "cancelled"
+                and fields.Datetime.to_datetime(event.date_start)
+                and fields.Datetime.to_datetime(event.date_start) >= now
+            )
+            if not upcoming_events:
+                upcoming_events = request.env["eventmind.event"].sudo().search(
+                    [
+                        ("status", "!=", "cancelled"),
+                        ("date_start", ">=", fields.Datetime.now()),
+                    ],
+                    order="date_start asc",
+                    limit=1,
+                )
+            if upcoming_events:
+                event = upcoming_events.sorted(key=lambda item: item.date_start or fields.Datetime.now())[0]
+                items.append(
+                    SimpleNamespace(
+                        event=event,
+                        label="Напоминание",
+                        message="Вы добавили это мероприятие в календарь. Не забудьте подготовиться к посещению.",
+                        display_datetime=event.eventmind_display_datetime(),
+                    )
+                )
+
         return sorted(items, key=lambda item: item.event.date_start or fields.Datetime.now())
 
     @staticmethod
